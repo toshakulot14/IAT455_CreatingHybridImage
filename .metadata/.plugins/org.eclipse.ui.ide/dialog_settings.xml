@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="ExternalProjectImportWizard">
+		<item value="false" key="WizardProjectsImportPage.STORE_NESTED_PROJECTS"/>
+		<item value="false" key="WizardProjectsImportPage.STORE_COPY_PROJECT_ID"/>
+		<item value="false" key="WizardProjectsImportPage.STORE_ARCHIVE_SELECTED"/>
+		<list key="WizardProjectsImportPage.STORE_DIRECTORIES">
+			<item value="C:\Users\My nam is Brad\Documents\SFU\Fall 2015\IAT 455\Project\IAT455_CreatingHybridImage\Lab Code (for reference)\IAT455 Week 9 Starter Code"/>
+			<item value="C:\Users\My nam is Brad\Documents\SFU\Fall 2015\IAT 455\Project\IAT455_CreatingHybridImage\Lab Code (for reference)\IAT455 Week 3 BaseCode"/>
+		</list>
+		<list key="WizardProjectsImportPage.STORE_ARCHIVES">
+			<item value=""/>
+		</list>
+	</section>
+</section>
