@@ -113,11 +113,17 @@ public class HybridImages extends Frame {
 	} // convolve
 	
 	private ArrayList<Integer> getRGBs(BufferedImage img, ArrayList<Integer> rgbs, int[] indices) {
-		for (int y = indices.length / 2; y <= indices.length - 1; y++) {
-			for (int x = 0; x <= indices.length / 2 - 1; x++) {
+		int xBegin = 0;
+		int xEnd = indices.length / 2 - 1;
+		int yBegin = indices.length / 2;
+		int yEnd = indices.length - 1;
+		
+		for (int x = xBegin; x <= xEnd; x++) {
+			for (int y = yBegin; y <= yEnd; y++) {
 				rgbs.add(img.getRGB(indices[x], indices[y]));
 			}
 		}
+		
 		return rgbs;
 	}
 	
@@ -181,10 +187,10 @@ public class HybridImages extends Frame {
 		for (int x = 0; x < result.getWidth(); x++) {
 			for (int y = 0; y < result.getHeight(); y++) {
 				int rgb = img.getRGB(x, y);
-				int newR = clip(255 - getRed(rgb));
-				int newG = clip(255 - getGreen(rgb));
-				int newB = clip(255 - getBlue(rgb));
-				result.setRGB(x, y, new Color(newR, newG, newB).getRGB());
+				int r = clip(255 - getRed(rgb));
+				int g = clip(255 - getGreen(rgb));
+				int b = clip(255 - getBlue(rgb));
+				result.setRGB(x, y, new Color(r, g, b).getRGB());
 			}
 		}
 
@@ -201,11 +207,11 @@ public class HybridImages extends Frame {
 				int rgbB = imgB.getRGB(x, y);
 
 				// O = (MV * A) + [(1 – MV) * B]
-				int newR = clip((int) ((mixVal * getRed(rgbA)) + (1 - mixVal) * getRed(rgbB)));
-				int newG = clip((int) ((mixVal * getGreen(rgbA)) + (1 - mixVal) * getGreen(rgbB)));
-				int newB = clip((int) ((mixVal * getBlue(rgbA)) + (1 - mixVal) * getBlue(rgbB)));
+				int r = clip((int) ((mixVal * getRed(rgbA)) + (1 - mixVal) * getRed(rgbB)));
+				int g = clip((int) ((mixVal * getGreen(rgbA)) + (1 - mixVal) * getGreen(rgbB)));
+				int b = clip((int) ((mixVal * getBlue(rgbA)) + (1 - mixVal) * getBlue(rgbB)));
 
-				result.setRGB(x, y, new Color(newR, newG, newB).getRGB());
+				result.setRGB(x, y, new Color(r, g, b).getRGB());
 			}
 		}
 
