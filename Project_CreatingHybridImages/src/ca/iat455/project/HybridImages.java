@@ -99,11 +99,11 @@ public class HybridImages extends Frame {
 				case blur:
 					int[] indicesBlur = {	x-3, x-2, x-1, x, x+1, x+2, x+3,
 											y-3, y-2, y-1, y, y+1, y+2, y+3 };
-					rgbs = populateRGBs(img, rgbs, indicesBlur);
+					rgbs = getRGBs(img, rgbs, indicesBlur);
 				case edge_detection:
 					int[] indicesEdge = {	x-1, x, x+1,
 											y-1, y, y+1 };
-					rgbs = populateRGBs(img, rgbs, indicesEdge);
+					rgbs = getRGBs(img, rgbs, indicesEdge);
 				} // switch
 				
 				result.setRGB(x, y, computeRGB(rgbs, filter));
@@ -112,7 +112,7 @@ public class HybridImages extends Frame {
 		return result;
 	} // convolve
 	
-	private ArrayList<Integer> populateRGBs(BufferedImage img, ArrayList<Integer> rgbs, int[] indices) {
+	private ArrayList<Integer> getRGBs(BufferedImage img, ArrayList<Integer> rgbs, int[] indices) {
 		for (int y = indices.length / 2; y <= indices.length - 1; y++) {
 			for (int x = 0; x <= indices.length / 2 - 1; x++) {
 				rgbs.add(img.getRGB(indices[x], indices[y]));
@@ -212,7 +212,7 @@ public class HybridImages extends Frame {
 		return result;
 	} // dissolve
 	
-	private BufferedImage combineImages(BufferedImage imgA, BufferedImage imgB, Operations operation) {
+	private BufferedImage combine(BufferedImage imgA, BufferedImage imgB, Operations operation) {
 		BufferedImage result = new BufferedImage(imgA.getWidth(), imgA.getHeight(), imgA.getType());
 
 		for (int i = 0; i < result.getWidth(); i++)
