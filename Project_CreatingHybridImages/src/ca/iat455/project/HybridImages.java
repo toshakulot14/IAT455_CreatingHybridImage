@@ -1,4 +1,5 @@
 package ca.iat455.project;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Frame;
@@ -16,62 +17,47 @@ public class HybridImages extends Frame {
 	private final static int X_OFFSET = 25;
 	private final static int Y_OFFSET = 40;
 	private final static int Y_FONT_OFFSET = 5;
-	private final static String[] labels = {	"Source1", "Source 2",
-												"Original filter 1", "Original filter 2", "Original hybrid",
-												"Blur", "Monochrome", "Test hybrid A",
-												"Blur", "Edge detection", "Some intermediate step?", "Test hybrid B"};
+	private final static String[] labels = { "Source1", "Source 2", "Original filter 1", "Original filter 2",
+			"Original hybrid", "Blur", "Gaussian derivative", "Intermediate step?", "Hybrid" };
 
-	private BufferedImage elephantImg;
-	private BufferedImage jaguarImg;
-	
-	private BufferedImage filteredElephantImg0;
-	private BufferedImage filteredJaguarImg0;
-	private BufferedImage hybridImg0;
-	
-	private BufferedImage filteredElephantImg1;
-	private BufferedImage filteredJaguarImg1;
-	private BufferedImage hybridImg1;
-	
-	private BufferedImage filteredJaguarImg2a;
-	private BufferedImage filteredJaguarImg2b;
-	private BufferedImage hybridImg2;
+	private BufferedImage imgA;
+	private BufferedImage imgB;
+
+	private BufferedImage origFilteredImgA;
+	private BufferedImage origFilteredImgB;
+	private BufferedImage origHybridImg;
+
+	private BufferedImage filteredImgA;
+	private BufferedImage filteredImgB1;
+	private BufferedImage filteredImgB2;
+	private BufferedImage filteredImgB3;
+	private BufferedImage hybridImg;
 
 	private ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
 	private int width, height;
 
-	public HybridImages() {		
+	public HybridImages() {
 		loadImages();
 
-		// Attempt #1
-		filteredElephantImg1 = convolve(elephantImg, Filters.blur);
-		filteredJaguarImg1 = monochrome(jaguarImg);
-		hybridImg1 = dissolve(filteredElephantImg0, filteredJaguarImg1, 0.5f);
-
-		// Attempt #2
-		filteredJaguarImg2a = convolve(jaguarImg, Filters.edge_detection);
-		// TODO Need to apply the derivative of gaussian filter to get embossed jaguar(?)
-		hybridImg2 = dissolve(filteredElephantImg0, filteredJaguarImg2a, 0.5f);
-//		hybridImg3 = combineImages(filteredElephantImg, filteredJaguarImg3, Operations.add);
+		filteredImgA = convolve(imgA, Filters.BLUR);
+		filteredImgB1 = convolve(imgB, Filters.GAUSSIAN_DERIV);
+		hybridImg = dissolve(filteredImgA, filteredImgB1, 0.5f);
 
 		// Row 1
-		images.add(elephantImg);
-		images.add(jaguarImg);
-		
+		images.add(imgA);
+		images.add(imgB);
+
 		// Row 2
-		images.add(filteredElephantImg0);
-		images.add(filteredJaguarImg0);
-		images.add(hybridImg0);
-		
+		images.add(origFilteredImgA);
+		images.add(origFilteredImgB);
+		images.add(origHybridImg);
+
 		// Row 3
-		images.add(filteredElephantImg1);
-		images.add(filteredJaguarImg1);
-		images.add(hybridImg1);
-		
-		// Row 4
-		images.add(filteredElephantImg1);
-		images.add(filteredJaguarImg2a);
-		images.add(filteredJaguarImg2b);
-		images.add(hybridImg2);
+		images.add(filteredImgA);
+		images.add(filteredImgB1);
+		images.add(filteredImgB2);
+//		images.add(filteredImgB3);
+		images.add(hybridImg);
 
 		setupWindow();
 	} // Constructor
@@ -79,94 +65,93 @@ public class HybridImages extends Frame {
 	private BufferedImage convolve(BufferedImage img, Filters filter) {
 		WritableRaster wRaster = img.copyData(null);
 		BufferedImage result = new BufferedImage(img.getColorModel(), wRaster, img.isAlphaPremultiplied(), null);
-		
+
 		int kernelSize = 0; // aka sigma
-		
+
 		switch (filter) {
-		case blur:
+		case BLUR:
 			kernelSize = 7;
 			break;
-		case edge_detection:
+		case GAUSSIAN_DERIV:
 			kernelSize = 3;
 			break;
 		}
-		
+
 		for (int x = kernelSize; x < result.getWidth() - kernelSize; x++) {
 			for (int y = kernelSize; y < result.getHeight() - kernelSize; y++) {
 				ArrayList<Integer> rgbs = new ArrayList<Integer>();
-				
+
 				switch (filter) {
-				case blur:
-					int[] indicesBlur = {	x-3, x-2, x-1, x, x+1, x+2, x+3,
-											y-3, y-2, y-1, y, y+1, y+2, y+3 };
+				case BLUR:
+					int[] indicesBlur = { x - 3, x - 2, x - 1, x, x + 1, x + 2, x + 3, y - 3, y - 2, y - 1, y, y + 1,
+							y + 2, y + 3 };
 					rgbs = getRGBs(img, rgbs, indicesBlur);
-				case edge_detection:
-					int[] indicesEdge = {	x-1, x, x+1,
-											y-1, y, y+1 };
+				case GAUSSIAN_DERIV:
+					int[] indicesEdge = { x - 1, x, x + 1, y - 1, y, y + 1 };
 					rgbs = getRGBs(img, rgbs, indicesEdge);
 				} // switch
-				
+
 				result.setRGB(x, y, computeRGB(rgbs, filter));
 			}
 		}
 		return result;
 	} // convolve
-	
+
 	private ArrayList<Integer> getRGBs(BufferedImage img, ArrayList<Integer> rgbs, int[] indices) {
 		int xBegin = 0;
 		int xEnd = indices.length / 2 - 1;
 		int yBegin = indices.length / 2;
 		int yEnd = indices.length - 1;
-		
+
 		for (int x = xBegin; x <= xEnd; x++) {
 			for (int y = yBegin; y <= yEnd; y++) {
 				rgbs.add(img.getRGB(indices[x], indices[y]));
 			}
 		}
-		
+
 		return rgbs;
 	}
-	
+
 	private int computeRGB(ArrayList<Integer> rgbs, Filters filter) {
 		ArrayList<Integer> reds = new ArrayList<Integer>();
 		ArrayList<Integer> greens = new ArrayList<Integer>();
 		ArrayList<Integer> blues = new ArrayList<Integer>();
-		
+
 		for (int i = 0; i < rgbs.size(); i++) {
 			int rgb = rgbs.get(i);
 			reds.add(getRed(rgb));
 			greens.add(getGreen(rgb));
 			blues.add(getBlue(rgb));
 		}
-		
+
 		int r = convolveChannel(reds, filter);
 		int g = convolveChannel(greens, filter);
 		int b = convolveChannel(blues, filter);
-		
+
 		return new Color(r, g, b).getRGB();
-	}	
-	
+	}
+
 	private int convolveChannel(ArrayList<Integer> channel, Filters filter) {
 		int c = 0;
 
 		switch (filter) {
-		case blur:
+		case BLUR:
 			for (int i = 0; i < channel.size(); i++) {
 				c += channel.get(i);
 			}
 			return c / channel.size();
-		case edge_detection:
-			int[] filter3x3 = { -1, -1, -1, -1, 8, -1, -1, -1, -1 };
+		case GAUSSIAN_DERIV:
+			int[] sobelFilter = { 1, 2, 1, 0, 0, -0, -1, -2, -1 };
 			for (int i = 0; i < channel.size(); i++) {
-				c += channel.get(i) * filter3x3[i];
+				c += channel.get(i) * sobelFilter[i];
 			}
 			return clip(c);
 		default:
 			return 0;
-		}	
+		}
 	} // convolveChannel
 
-	private BufferedImage monochrome(BufferedImage img) {
+	private BufferedImage greyscale(BufferedImage img) {
 		BufferedImage result = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
 
 		for (int x = 0; x < result.getWidth(); x++) {
@@ -180,7 +165,7 @@ public class HybridImages extends Frame {
 
 		return result;
 	} // monochrome
-	
+
 	public BufferedImage invert(BufferedImage img) {
 		BufferedImage result = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
 
@@ -217,7 +202,7 @@ public class HybridImages extends Frame {
 
 		return result;
 	} // dissolve
-	
+
 	private BufferedImage combine(BufferedImage imgA, BufferedImage imgB, Operations operation) {
 		BufferedImage result = new BufferedImage(imgA.getWidth(), imgA.getHeight(), imgA.getType());
 
@@ -238,32 +223,32 @@ public class HybridImages extends Frame {
 					g = (getGreen(rgb1) * getGreen(rgb2)) / 255;
 					b = (getBlue(rgb1) * getBlue(rgb2)) / 255;
 				}
-				
+
 				result.setRGB(i, j, new Color(clip(r), clip(g), clip(b)).getRGB());
 			} // for
 		return result;
 	} // combineImages
-	
+
 	private void loadImages() {
 		try {
-			elephantImg = ImageIO.read(new File("elephant.png"));
-			jaguarImg = ImageIO.read(new File("jaguar.png"));
-			filteredElephantImg0 = ImageIO.read(new File("filteredElephant.png"));
-			filteredJaguarImg0 = ImageIO.read(new File("filteredJaguar.png"));
-			hybridImg0 = ImageIO.read(new File("hybrid.png"));
+			imgA = ImageIO.read(new File("elephant.png"));
+			imgB = ImageIO.read(new File("jaguar.png"));
+			origFilteredImgA = ImageIO.read(new File("filteredElephant.png"));
+			origFilteredImgB = ImageIO.read(new File("filteredJaguar.png"));
+			origHybridImg = ImageIO.read(new File("hybrid.png"));
 
 		} catch (Exception e) {
 			System.out.println("Cannot load the provided image");
 		}
-		
-		width = jaguarImg.getWidth();
-		height = jaguarImg.getHeight();
+
+		width = imgB.getWidth();
+		height = imgB.getHeight();
 	}
 
 	private void setupWindow() {
 		setTitle("Hybrid Images");
 		setVisible(true);
-		setSize(width * 5, height * 6);
+		setSize(width * 6, height * 6);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				System.exit(0);
@@ -280,11 +265,11 @@ public class HybridImages extends Frame {
 	private int getRed(int rgb) {
 		return new Color(rgb).getRed();
 	}
-	
+
 	private int getGreen(int rgb) {
 		return new Color(rgb).getGreen();
 	}
-	
+
 	private int getBlue(int rgb) {
 		return new Color(rgb).getBlue();
 	}
@@ -292,11 +277,11 @@ public class HybridImages extends Frame {
 	public void paint(Graphics g) {
 		int w = width;
 		int h = height;
-		
+
 		g.setColor(Color.BLACK);
 		Font f1 = new Font("Verdana", Font.PLAIN, 13);
 		g.setFont(f1);
-		
+
 		int x = X_OFFSET;
 		int y = Y_OFFSET + Y_FONT_OFFSET;
 
@@ -304,8 +289,8 @@ public class HybridImages extends Frame {
 			g.drawString(labels[i], x, y - Y_FONT_OFFSET);
 			g.drawImage(images.get(i), x, y, w, h, this);
 			x += w + X_OFFSET;
-			
-			if (i == 1 || i == 4 || i == 7) {
+
+			if (i == 1 || i == 4) {
 				x = X_OFFSET;
 				y += h + Y_OFFSET;
 			}
