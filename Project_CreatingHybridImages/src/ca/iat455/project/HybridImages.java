@@ -77,8 +77,9 @@ public class HybridImages extends Frame {
 			break;
 		}
 
-		for (int x = kernelSize; x < result.getWidth() - kernelSize; x++) {
-			for (int y = kernelSize; y < result.getHeight() - kernelSize; y++) {
+		int edge = kernelSize / 2;
+		for (int x = edge; x < result.getWidth() - edge; x++) {
+			for (int y = edge; y < result.getHeight() - edge; y++) {
 				ArrayList<Integer> rgbs = new ArrayList<Integer>();
 
 				switch (filter) {
