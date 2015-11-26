@@ -13,12 +13,14 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-public class HybridImages extends Frame {
+public class HybridProcess extends Frame {
 	private final static int X_OFFSET = 25;
 	private final static int Y_OFFSET = 40;
 	private final static int Y_FONT_OFFSET = 5;
-	private final static String[] labels = { "Source1", "Source 2", "Original filter 1", "Original filter 2",
-			"Original hybrid", "Blur", "Gaussian derivative", "Intermediate step?", "Hybrid" };
+	private final static String[] labels = {
+			"Source1", "Source 2", "Original filter 1", "Original filter 2",
+			"Original hybrid", "Blur", "Sobel filter", "Grayscale", "Dissolve (Sobel + gryscl)", "Hybrid (& brightened)",
+			"Hybrid 2 (w/ gryscl)" };
 
 	private BufferedImage imgA;
 	private BufferedImage imgB;
@@ -31,18 +33,24 @@ public class HybridImages extends Frame {
 	private BufferedImage filteredImgB1;
 	private BufferedImage filteredImgB2;
 	private BufferedImage filteredImgB3;
+	private BufferedImage filteredImgB4;
 	private BufferedImage hybridImg;
+	private BufferedImage hybridImg2;
 
 	private ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
 	private int width, height;
 
-	public HybridImages() {
+	public HybridProcess() {
 		loadImages();
 
 		filteredImgA = convolve(imgA, Filters.BLUR);
 		filteredImgB1 = convolve(imgB, Filters.GAUSSIAN_DERIV);
-		hybridImg = dissolve(filteredImgA, filteredImgB1, 0.5f);
-
+		filteredImgB2 = greyscale(imgB);
+		filteredImgB3 = dissolve(filteredImgB2, filteredImgB1, 0.5f);
+		hybridImg = brighten(dissolve(filteredImgA, filteredImgB3, 0.5f), 1.5f);
+		
+		hybridImg2 = dissolve(filteredImgA, filteredImgB2, 0.5f);
+		
 		// Row 1
 		images.add(imgA);
 		images.add(imgB);
@@ -56,17 +64,36 @@ public class HybridImages extends Frame {
 		images.add(filteredImgA);
 		images.add(filteredImgB1);
 		images.add(filteredImgB2);
-//		images.add(filteredImgB3);
+		images.add(filteredImgB3);
 		images.add(hybridImg);
+		
+		// Row 4
+		images.add(hybridImg2);
 
 		setupWindow();
 	} // Constructor
+	
+	public BufferedImage brighten(BufferedImage img, float factor) {
+		BufferedImage result = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
+
+		for (int i = 0; i < result.getWidth(); i++) {
+			for (int j = 0; j < result.getHeight(); j++) {
+				int rgb = img.getRGB(i, j);
+				int r = clip((int)(getRed(rgb) * factor));
+				int g = clip((int)(getGreen(rgb) * factor));
+				int b = clip((int)(getBlue(rgb) * factor));
+				result.setRGB(i, j, new Color(r, g, b).getRGB());
+			}
+		}
+
+		return result;
+	}
 	
 	private BufferedImage convolve(BufferedImage img, Filters filter) {
 		WritableRaster wRaster = img.copyData(null);
 		BufferedImage result = new BufferedImage(img.getColorModel(), wRaster, img.isAlphaPremultiplied(), null);
 
-		int kernelSize = 0; // aka sigma
+		int kernelSize; // apparently different from sigma?
 
 		switch (filter) {
 		case BLUR:
@@ -74,6 +101,9 @@ public class HybridImages extends Frame {
 			break;
 		case GAUSSIAN_DERIV:
 			kernelSize = 3;
+			break;
+		default:
+			kernelSize = 0;
 			break;
 		}
 
@@ -87,9 +117,13 @@ public class HybridImages extends Frame {
 					int[] indicesBlur = { x - 3, x - 2, x - 1, x, x + 1, x + 2, x + 3, y - 3, y - 2, y - 1, y, y + 1,
 							y + 2, y + 3 };
 					rgbs = getRGBs(img, rgbs, indicesBlur);
+					break;
 				case GAUSSIAN_DERIV:
 					int[] indicesEdge = { x - 1, x, x + 1, y - 1, y, y + 1 };
 					rgbs = getRGBs(img, rgbs, indicesEdge);
+					break;
+				default:
+					break;
 				} // switch
 
 				result.setRGB(x, y, computeRGB(rgbs, filter));
@@ -204,32 +238,6 @@ public class HybridImages extends Frame {
 		return result;
 	} // dissolve
 
-	private BufferedImage combine(BufferedImage imgA, BufferedImage imgB, Operations operation) {
-		BufferedImage result = new BufferedImage(imgA.getWidth(), imgA.getHeight(), imgA.getType());
-
-		for (int i = 0; i < result.getWidth(); i++)
-			for (int j = 0; j < result.getHeight(); j++) {
-				int rgb1 = imgA.getRGB(i, j);
-				int rgb2 = imgB.getRGB(i, j);
-
-				int r = 0, g = 0, b = 0;
-
-				if (operation == Operations.add) {
-					r = getRed(rgb1) + getRed(rgb2);
-					g = getGreen(rgb1) + getGreen(rgb2);
-					b = getBlue(rgb1) + getBlue(rgb2);
-
-				} else if (operation == Operations.multiply) {
-					r = (getRed(rgb1) * getRed(rgb2)) / 255;
-					g = (getGreen(rgb1) * getGreen(rgb2)) / 255;
-					b = (getBlue(rgb1) * getBlue(rgb2)) / 255;
-				}
-
-				result.setRGB(i, j, new Color(clip(r), clip(g), clip(b)).getRGB());
-			} // for
-		return result;
-	} // combineImages
-
 	private void loadImages() {
 		try {
 			imgA = ImageIO.read(new File("elephant.png"));
@@ -279,7 +287,6 @@ public class HybridImages extends Frame {
 		int w = width;
 		int h = height;
 
-		g.setColor(Color.BLACK);
 		Font f1 = new Font("Verdana", Font.PLAIN, 13);
 		g.setFont(f1);
 
@@ -287,19 +294,24 @@ public class HybridImages extends Frame {
 		int y = Y_OFFSET + Y_FONT_OFFSET;
 
 		for (int i = 0; i < images.size(); i++) {
+			g.setColor(Color.BLACK);
 			g.drawString(labels[i], x, y - Y_FONT_OFFSET);
 			g.drawImage(images.get(i), x, y, w, h, this);
 			x += w + X_OFFSET;
 
-			if (i == 1 || i == 4) {
+			// Separate images into rows
+			if (i == 1 || i == 4 || i == 9) {
 				x = X_OFFSET;
-				y += h + Y_OFFSET;
+				y += h + Y_OFFSET / 2;
+				g.setColor(Color.LIGHT_GRAY);
+				g.drawLine(0, y, getWidth(), y);
+				y += Y_OFFSET / 2;
 			}
 		}
 	} // paint
 
 	public static void main(String[] args) {
-		HybridImages hybridImages = new HybridImages();
+		HybridProcess hybridImages = new HybridProcess();
 		hybridImages.repaint();
 	}
 } // TestHybrid
