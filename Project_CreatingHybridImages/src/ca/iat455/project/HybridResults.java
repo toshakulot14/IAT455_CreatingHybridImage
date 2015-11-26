@@ -6,10 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -19,7 +16,7 @@ import javax.swing.JScrollPane;
  * 
  * @author Melissa Wang
  */
-public class HybridResults extends HybridClass {	
+public class HybridResults extends HybridAbstractClass {	
 	private static final long serialVersionUID = 1L;
 	
 	// Constants for output display
@@ -29,16 +26,6 @@ public class HybridResults extends HybridClass {
 	private final static int IMAGE_Y_OFFSET = 40;
 	private final static int IMAGES_PER_ROW = 5;
 
-	// Source images for hybrid image process
-	private BufferedImage imgA1;
-	private BufferedImage imgA2;
-//	private BufferedImage imgB1;
-//	private BufferedImage imgB2;
-//	private BufferedImage imgC1;
-//	private BufferedImage imgC2;
-//	private BufferedImage imgD1;
-//	private BufferedImage imgD2;
-
 	// Fields for output display
 	private JPanel panel;
 	private JScrollPane scrollPane;
@@ -46,11 +33,12 @@ public class HybridResults extends HybridClass {
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public HybridResults() {
-		loadImages();
-		createHybridImage(imgA1, imgA2); // similar shape, similar alignment
-		createHybridImage(imgA1, imgA2); // similar shape, different alignment
-		createHybridImage(imgA1, imgA2); // different shape, similar alignment
-		createHybridImage(imgA1, imgA2); // different shape, different alignment
+		String[] imgNames = {"lion", "tiger"};
+		loadImages(imgNames);
+		
+		for (int i = 0; i < inputImages.size(); i += 2) {
+			createHybridImage(inputImages.get(i), inputImages.get(i + 1));
+		}
 		
 //		createHybridImage(imgB1, imgB2); // similar shape, different alignment
 //		createHybridImage(imgC1, imgC2); // different shape, similar alignment
@@ -77,31 +65,9 @@ public class HybridResults extends HybridClass {
 		
 		// Add hybrid image to ArrayList for output display
 		for (int i = 0; i < IMAGES_PER_ROW; i++) {
-			images.add(hybridImg);
+			outputImages.add(hybridImg);
 		}
 	} // createHybridImage
-	
-	///////////////////////////////////////// Setup /////////////////////////////////////////
-
-	private void loadImages() {
-		try {
-			imgA1 = ImageIO.read(new File("lion.jpg"));
-			imgA2 = ImageIO.read(new File("tiger.jpg"));
-
-		} catch (Exception e) {
-			System.out.println("Cannot load the provided image");
-		}
-
-		width = imgA1.getWidth();
-		height = imgA1.getHeight();
-	} // loadImages
-
-	private void setupWindow() {
-		panel.setPreferredSize(PANEL_SIZE);
-		scrollPane = new JScrollPane(panel);
-		add(scrollPane, BorderLayout.CENTER);
-		super.setupWindow("Hybrid Image Comparison");
-	} // setupWindow
 	
 	///////////////////////////////////////// Display /////////////////////////////////////////
 	
@@ -123,19 +89,19 @@ public class HybridResults extends HybridClass {
         		// Set labels
         		Font font = new Font("Verdana", Font.PLAIN, 20);
         		g.setFont(font);
-        		String[] labels = { "Similar shape and alignment",
-						 "Similar shape, different alignment",
-						 "Different shape, similar alignment",
-						 "Different shape and alignment" };
+        		String[] labels = {  "Similar shape and alignment",
+									 "Similar shape, different alignment",
+									 "Different shape, similar alignment",
+									 "Different shape and alignment" };
 
-        		for (int i = 0; i < images.size(); i++) {
+        		for (int i = 0; i < outputImages.size(); i++) {
         			// Draw labels and images
         			g.setColor(Color.BLACK);
         			if (i % 5 == 0) {
         				g.drawString(labels[labelIndex], x, y - (LABEL_Y_OFFSET / 4));
         				labelIndex++;
         			}
-        			g.drawImage(images.get(i), x, y, w, h, this);
+        			g.drawImage(outputImages.get(i), x, y, w, h, this);
         			
         			// Set values to next image in row
         			// And make next image half the size of previous image
@@ -159,13 +125,10 @@ public class HybridResults extends HybridClass {
         }; // JPanel
 	} // drawImages
 	
-	///////////////////////////////////////// Main /////////////////////////////////////////
-
-	public static void main(String[] args) {
-		HybridProcess hybridProcess = new HybridProcess();
-		hybridProcess.repaint();
-		
-		HybridResults hybridDisplay = new HybridResults();
-		hybridDisplay.repaint();
-	}
+	private void setupWindow() {
+		panel.setPreferredSize(PANEL_SIZE);
+		scrollPane = new JScrollPane(panel);
+		add(scrollPane, BorderLayout.CENTER);
+		super.setupWindow("Hybrid Image Comparison");
+	} // setupWindow
 } // TestHybrid

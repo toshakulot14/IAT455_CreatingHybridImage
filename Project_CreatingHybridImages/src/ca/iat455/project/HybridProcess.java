@@ -3,20 +3,17 @@ package ca.iat455.project;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 
 /**
  * This class shows the process of producing a hybrid image.
  * 
  * @author Melissa Wang
  */
-public class HybridProcess extends HybridClass {
+public class HybridProcess extends HybridAbstractClass {
 	private static final long serialVersionUID = 1L;
 	
 	private final static int IMAGE_X_OFFSET = 25;
@@ -40,23 +37,23 @@ public class HybridProcess extends HybridClass {
 		BufferedImage hybridImg2 = dissolve(filteredImgA, filteredImgB2, 0.5f);
 		
 		// Row 1
-		images.add(imgA);
-		images.add(imgB);
+		outputImages.add(imgA);
+		outputImages.add(imgB);
 
 		// Row 2
-		images.add(origFilteredImgA);
-		images.add(origFilteredImgB);
-		images.add(origHybridImg);
+		outputImages.add(origFilteredImgA);
+		outputImages.add(origFilteredImgB);
+		outputImages.add(origHybridImg);
 
 		// Row 3
-		images.add(filteredImgA);
-		images.add(filteredImgB1);
-		images.add(filteredImgB2);
-		images.add(filteredImgB3);
-		images.add(hybridImg);
+		outputImages.add(filteredImgA);
+		outputImages.add(filteredImgB1);
+		outputImages.add(filteredImgB2);
+		outputImages.add(filteredImgB3);
+		outputImages.add(hybridImg);
 		
 		// Row 4
-		images.add(hybridImg2);
+		outputImages.add(hybridImg2);
 
 		setupWindow();
 	} // Constructor
@@ -101,17 +98,17 @@ public class HybridProcess extends HybridClass {
 				"Original hybrid", "Blur", "Sobel filter", "Grayscale", "Dissolve (Sobel + gryscl)", "Hybrid (& brightened)",
 				"Hybrid 2 (w/ gryscl)" };
 
-		for (int i = 0; i < images.size(); i++) {
+		for (int i = 0; i < outputImages.size(); i++) {
 			// Draw labels and images
 			g.setColor(Color.BLACK);
 			g.drawString(labels[i], x, y - LABEL_Y_OFFSET);
-			g.drawImage(images.get(i), x, y, w, h, this);
+			g.drawImage(outputImages.get(i), x, y, w, h, this);
 			
 			// Set values to next image in row
 			x += w + IMAGE_X_OFFSET;
 
 			// Reset values to draw next row of images
-			if (i == 1 || i == 4 || i == 9) {
+			if (i == 4 || i == 9) {
 				x = IMAGE_X_OFFSET;
 				y += h + IMAGE_Y_OFFSET / 2;
 				g.setColor(Color.LIGHT_GRAY);
