@@ -5,8 +5,18 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -30,6 +40,15 @@ public class HybridResults extends HybridAbstractClass {
 	private JPanel panel;
 	private JScrollPane scrollPane;
 	
+	// Fields for user input images
+	private BufferedImage img1;
+	private BufferedImage img2;
+	
+	// Fields for menu
+	private JMenuBar menuBar = new JMenuBar();
+	private JMenu menu = new JMenu("File");
+	private ActionListener menuListener;
+	
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public HybridResults() {
@@ -37,6 +56,8 @@ public class HybridResults extends HybridAbstractClass {
 		createHybridImages();
 		drawImages();
 		setupWindow();
+		setupMenu();
+		setupMenuListener();
 	} // Constructor
 	
 	private void createHybridImages() {
@@ -109,4 +130,63 @@ public class HybridResults extends HybridAbstractClass {
 		add(scrollPane, BorderLayout.CENTER);
 		super.setupWindow("Hybrid Image Comparison");
 	} // setupWindow
+	
+	private void setupMenuListener() {
+		menuListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getActionCommand().equals("Open...")) {
+					selectImage();
+				} else if (e.getActionCommand().equals("Exit")) {
+					System.exit(0);
+				}
+			}
+		};
+		
+		menu.setMnemonic(KeyEvent.VK_F);
+		for (int i = 0; i < menu.getItemCount(); i++) {
+			JMenuItem item = menu.getItem(i);
+			if (item.getText().equals("Open..."))
+				item.setMnemonic(KeyEvent.VK_O);
+			else
+				item.setMnemonic(KeyEvent.VK_E);
+			item.addActionListener(menuListener);
+		}
+	}
+	
+	private void setupMenu() {
+		addMenuItem("Open...", "Open file");
+		addMenuItem("Exit", "Exit application");
+		menuBar.add(menu);
+		setJMenuBar(menuBar);
+	}
+	
+	private void addMenuItem(String name, String tooltip) {
+		JMenuItem item = new JMenuItem(name);
+		item.setToolTipText(tooltip);
+		menu.add(item);
+	}
+	
+	private BufferedImage selectImage() {
+		BufferedImage img = null;
+
+		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+		chooser.setDialogTitle("Select an Image");
+
+		int returnVal = chooser.showOpenDialog(this);
+		File file = null;
+
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			file = chooser.getSelectedFile();
+		}
+
+		try {
+			img = ImageIO.read(file);
+		} catch (Exception e) {
+			System.out.println("Cannot retrieve image");
+		}
+
+		return img;
+	} // selectImage
 } // TestHybrid
