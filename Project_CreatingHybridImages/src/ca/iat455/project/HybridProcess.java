@@ -46,8 +46,6 @@ public class HybridProcess extends HybridAbstractClass {
 		outputImages.add(hybridImg);
 	} // createHybridImages
 
-	///////////////////////////////////////// Display /////////////////////////////////////////
-
 	public void paint(Graphics g) {
 		super.paint(g);
 		

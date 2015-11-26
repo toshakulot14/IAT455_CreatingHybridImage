@@ -53,22 +53,6 @@ public class HybridAbstractClass extends JFrame {
 		return images;
 	} // createHybridImage
 	
-	/*protected BufferedImage createHybridImage(BufferedImage img1, BufferedImage img2) {
-		// Low frequency image
-		BufferedImage filteredImg1 = convolve(img1, Filters.LOW_FREQ);
-		
-		// High frequency image
-		BufferedImage filteredImg2a = convolve(img2, Filters.HIGH_FREQ);
-		BufferedImage filteredImg2b = grayscale(img2);
-		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, 0.5f);
-		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
-		
-		// Hybrid image
-		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2d, 0.5f);
-		
-		return hybridImg;
-	} // createHybridImage*/
-	
 	public BufferedImage convolve(BufferedImage img, Filters filter) {
 		WritableRaster wRaster = img.copyData(null);
 		BufferedImage result = new BufferedImage(img.getColorModel(), wRaster, img.isAlphaPremultiplied(), null);
