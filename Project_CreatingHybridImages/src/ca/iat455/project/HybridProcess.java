@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
-
-import javax.imageio.ImageIO;
+import java.util.ArrayList;
 
 /**
  * This class shows the process of producing a hybrid image.
@@ -28,37 +26,24 @@ public class HybridProcess extends HybridAbstractClass {
 	} // Constructor
 
 	private void createHybridImages() {
-		BufferedImage imgA = inputImages.get(0);
-		BufferedImage imgB = inputImages.get(1);
-		
-		// Low-frequency image
-		BufferedImage filteredImgA = convolve(imgA, Filters.LOW_FREQ);
-		
-		// High-frequency image
-		BufferedImage filteredImgB1 = convolve(imgB, Filters.HIGH_FREQ);
-		BufferedImage filteredImgB2 = grayscale(imgB);
-		BufferedImage filteredImgB3 = dissolve(filteredImgB2, filteredImgB1, 0.5f);
-		
-		// First hybrid image
-		BufferedImage hybridImg = brighten(dissolve(filteredImgA, filteredImgB3, 0.5f), 1.5f);
-		
-		// Second hybrid image
-		BufferedImage hybridImg2 = dissolve(filteredImgA, filteredImgB2, 0.5f);
-		
-		// Row 1
+		// Add input images for output display
 		for (BufferedImage img : inputImages) {
 			outputImages.add(img);
 		}
-
-		// Row 2
-		outputImages.add(filteredImgA);
-		outputImages.add(filteredImgB1);
-		outputImages.add(filteredImgB2);
-		outputImages.add(filteredImgB3);
-		outputImages.add(hybridImg);
 		
-		// Row 3
-		outputImages.add(hybridImg2);
+		// Attempt #1
+		BufferedImage img1 = inputImages.get(0);
+		BufferedImage img2 = inputImages.get(1);
+		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, true);
+		outputImages.addAll(processImages);
+		
+		// Attempt #2
+		BufferedImage filteredImg1 = convolve(img1, Filters.LOW_FREQ);
+		BufferedImage filteredImg2 = grayscale(img2);
+		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2, 0.5f);
+		outputImages.add(filteredImg1);
+		outputImages.add(filteredImg2);
+		outputImages.add(hybridImg);
 	} // createHybridImages
 
 	///////////////////////////////////////// Display /////////////////////////////////////////
@@ -77,8 +62,8 @@ public class HybridProcess extends HybridAbstractClass {
 		g.setFont(font);
 		String[] labels = {
 				"Source1", "Source 2", "Original filter 1", "Original filter 2",
-				"Original hybrid", "Blur", "Sobel filter", "Grayscale", "Dissolve (Sobel + gryscl)", "Hybrid (& brightened)",
-				"Hybrid 2 (w/ gryscl)" };
+				"Original hybrid", "Blur", "Sobel filter", "Grayscale", "Dissolve (Sobel + gryscl)", "Brightened", "Hybrid 1",
+				"Blur", "Grayscale", "Hybrid 2" };
 
 		for (int i = 0; i < outputImages.size(); i++) {
 			// Draw labels and images
@@ -90,7 +75,7 @@ public class HybridProcess extends HybridAbstractClass {
 			x += w + IMAGE_X_OFFSET;
 
 			// Reset values to draw next row of images
-			if (i == 4 || i == 9) {
+			if (i == 4 || i == 10) {
 				x = IMAGE_X_OFFSET;
 				y += h + IMAGE_Y_OFFSET / 2;
 				g.setColor(Color.LIGHT_GRAY);

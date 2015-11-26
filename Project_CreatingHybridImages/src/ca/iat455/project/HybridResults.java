@@ -33,44 +33,23 @@ public class HybridResults extends HybridAbstractClass {
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public HybridResults() {
-		String[] imgNames = {"lion", "tiger"};
-		loadImages(imgNames, true);
-		
-		for (int i = 0; i < inputImages.size(); i += 2) {
-			createHybridImage(inputImages.get(i), inputImages.get(i + 1));
-		}
-		
-//		createHybridImage(imgB1, imgB2); // similar shape, different alignment
-//		createHybridImage(imgC1, imgC2); // different shape, similar alignment
-//		createHybridImage(imgD1, imgD2); // different shape, different alignment
-		
+		loadImages(new String[]{"lion", "tiger"}, true);
+		createHybridImages();
 		drawImages();
 		setupWindow();
 	} // Constructor
-
-	///////////////////////////////////////// Process /////////////////////////////////////////
 	
-	private void createHybridImage(BufferedImage img1, BufferedImage img2) {
-		// Low frequency image
-		BufferedImage filteredImg1 = convolve(img1, Filters.LOW_FREQ);
-		
-		// High frequency image
-		BufferedImage filteredImg2a = convolve(img2, Filters.HIGH_FREQ);
-		BufferedImage filteredImg2b = grayscale(img2);
-		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, 0.5f);
-		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
-		
-		// Hybrid image
-		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2d, 0.5f);
-		
-		// Add hybrid image to ArrayList for output display
-		for (int i = 0; i < IMAGES_PER_ROW; i++) {
-			outputImages.add(hybridImg);
+	private void createHybridImages() {
+		for (int i = 0; i < inputImages.size(); i += 2) {
+			BufferedImage hybridImg = createHybridImage(inputImages.get(i), inputImages.get(i + 1), false).get(0);
+			
+			// Add hybrid image to ArrayList for output display
+			for (int j = 0; j < IMAGES_PER_ROW; j++) {
+				outputImages.add(hybridImg);
+			}
 		}
-	} // createHybridImage
-	
-	///////////////////////////////////////// Display /////////////////////////////////////////
-	
+	} // createHybridImages
+		
 	private void drawImages() {
 		panel = new JPanel() {
 			private static final long serialVersionUID = 1L;
