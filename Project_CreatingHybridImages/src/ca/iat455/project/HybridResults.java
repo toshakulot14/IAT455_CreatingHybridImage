@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 /**
- * This class shows four different sets of hybrid images, using different source
+ * This class shows three different sets of hybrid images, using different source
  * images with varying combinations of shape and alignment.
  * 
  * @author Melissa Wang
@@ -20,11 +20,11 @@ public class HybridResults extends HybridAbstractClass {
 	private static final long serialVersionUID = 1L;
 	
 	// Constants for output display
-	private final static Dimension PANEL_SIZE = new Dimension(1000, 1700);
+	private final static Dimension PANEL_SIZE = new Dimension(1000, 1250);
 	private final static int LABEL_Y_OFFSET = 50;
 	private final static int IMAGE_X_OFFSET = 10;
 	private final static int IMAGE_Y_OFFSET = 40;
-	private final static int IMAGES_PER_ROW = 5;
+	private final static int IMAGES_PER_ROW = 4;
 
 	// Fields for output display
 	private JPanel panel;
@@ -33,7 +33,7 @@ public class HybridResults extends HybridAbstractClass {
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public HybridResults() {
-		loadImages(new String[]{"lion", "tiger"}, true);
+		loadImages(new String[]{"lion", "tiger", "lion", "tiger2", "SFU", "tiger"}, true);
 		createHybridImages();
 		drawImages();
 		setupWindow();
@@ -70,13 +70,12 @@ public class HybridResults extends HybridAbstractClass {
         		g.setFont(font);
         		String[] labels = {  "Similar shape and alignment",
 									 "Similar shape, different alignment",
-									 "Different shape, similar alignment",
 									 "Different shape and alignment" };
 
         		for (int i = 0; i < outputImages.size(); i++) {
         			// Draw labels and images
         			g.setColor(Color.BLACK);
-        			if (i % 5 == 0) {
+        			if (i % 4 == 0) {
         				g.drawString(labels[labelIndex], x, y - (LABEL_Y_OFFSET / 4));
         				labelIndex++;
         			}
@@ -90,7 +89,7 @@ public class HybridResults extends HybridAbstractClass {
 
         			// Reset values to draw next row of images
         			// And draw row-separating line
-        			if (i == 4 || i == 9 || i == 14) {
+        			if (i == 3 || i == 7) {
         				w = width;
         				h = height;
         				x = IMAGE_X_OFFSET;

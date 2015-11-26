@@ -30,7 +30,12 @@ public class HybridAbstractClass extends JFrame {
 		ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
 		
 		// Low frequency image
-		BufferedImage filteredImg1 = convolve(img1, Filters.LOW_FREQ);
+		BufferedImage filteredImg1;
+		if (!isTest) {
+			filteredImg1 = grayscale(convolve(img1, Filters.LOW_FREQ));
+		} else {
+			filteredImg1 = convolve(img1, Filters.LOW_FREQ);
+		}
 		
 		// High frequency image
 		BufferedImage filteredImg2a = convolve(img2, Filters.HIGH_FREQ);
@@ -39,7 +44,7 @@ public class HybridAbstractClass extends JFrame {
 		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
 		
 		// Hybrid image
-		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2d, 0.5f);
+		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2c, 0.5f);
 		
 		if (isTest) {
 			images.add(filteredImg1);
@@ -249,9 +254,7 @@ public class HybridAbstractClass extends JFrame {
 		width = img.getWidth();
 		height = img.getHeight();
 	} // loadImages
-	
-	///////////////////////////////////////// Display /////////////////////////////////////////
-	
+		
 	protected void setupWindow(String title) {
 		setTitle(title);
 		setMinimumSize(new Dimension(1200, 700));
