@@ -3,6 +3,7 @@ package ca.iat455.project;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -16,15 +17,24 @@ import javax.swing.JScrollPane;
 
 public class HybridResults extends JFrame {
 	// Constants for output display
-	private final static int WINDOW_X = 1000;
-	private final static int WINDOW_Y = 1400;
-	private final static int X_OFFSET = 16;
-	private final static int Y_OFFSET = 40;
-	private final static int MAX_IMAGES = 5;
+	private final static int LABEL_Y_OFFSET = 50;
+	private final static int IMAGE_X_OFFSET = 10;
+	private final static int IMAGE_Y_OFFSET = 40;
+	private final static int IMAGES_PER_ROW = 5;
+	private final static String[] labels = { "Similar shape and alignment",
+											 "Similar shape, different alignment",
+											 "Different shape, similar alignment",
+											 "Different shape and alignment" };
 
-	// Source images
-	private BufferedImage imgA;
-	private BufferedImage imgB;
+	// Source images for hybrid image process
+	private BufferedImage imgA1;
+	private BufferedImage imgA2;
+	private BufferedImage imgB1;
+	private BufferedImage imgB2;
+	private BufferedImage imgC1;
+	private BufferedImage imgC2;
+	private BufferedImage imgD1;
+	private BufferedImage imgD2;
 
 	// Fields for output display
 	private ArrayList<BufferedImage> hybridImgs = new ArrayList<BufferedImage>();
@@ -36,25 +46,35 @@ public class HybridResults extends JFrame {
 
 	public HybridResults() {
 		loadImages();
-		createHybridImage(imgA, imgB);
-		createHybridImage(imgA, imgB);
-		createHybridImage(imgA, imgB);
-		createHybridImage(imgA, imgB);
+		createHybridImage(imgA1, imgA2); // similar shape, similar alignment
+		createHybridImage(imgA1, imgA2); // similar shape, different alignment
+		createHybridImage(imgA1, imgA2); // different shape, similar alignment
+		createHybridImage(imgA1, imgA2); // different shape, different alignment
+		
+//		createHybridImage(imgB1, imgB2); // similar shape, different alignment
+//		createHybridImage(imgC1, imgC2); // different shape, similar alignment
+//		createHybridImage(imgD1, imgD2); // different shape, different alignment
+		
 		drawImages();
 		setupWindow();
 	} // Constructor
 
 	///////////////////////////////////////// Process /////////////////////////////////////////
 	
-	private void createHybridImage(BufferedImage imgA, BufferedImage imgB) {
-		BufferedImage filteredImgA = convolve(imgA, Filters.LOW_FREQ);
-		BufferedImage filteredImgB1 = convolve(imgB, Filters.HIGH_FREQ);
-		BufferedImage filteredImgB2 = grayscale(imgB);
-		BufferedImage filteredImgB3 = dissolve(filteredImgB2, filteredImgB1, 0.5f);
-		BufferedImage hybridImg = brighten(dissolve(filteredImgA, filteredImgB3, 0.5f), 1.5f);
+	private void createHybridImage(BufferedImage img1, BufferedImage img2) {
+		// Low frequency image
+		BufferedImage filteredImg1 = convolve(img1, Filters.LOW_FREQ);
+		
+		// High frequency image
+		BufferedImage filteredImg2a = convolve(img2, Filters.HIGH_FREQ);
+		BufferedImage filteredImg2b = grayscale(img2);
+		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, 0.5f);
+		
+		// Hybrid image
+		BufferedImage hybridImg = brighten(dissolve(filteredImg1, filteredImg2c, 0.5f), 1.5f);
 		
 		// Add hybrid image to ArrayList for output display
-		for (int i = 0; i < MAX_IMAGES; i++) {
+		for (int i = 0; i < IMAGES_PER_ROW; i++) {
 			hybridImgs.add(hybridImg);
 		}
 	} // createHybridImage
@@ -240,26 +260,25 @@ public class HybridResults extends JFrame {
 
 	private void loadImages() {
 		try {
-			imgA = ImageIO.read(new File("lion.jpg"));
-			imgB = ImageIO.read(new File("tiger.jpg"));
+			imgA1 = ImageIO.read(new File("lion.jpg"));
+			imgA2 = ImageIO.read(new File("tiger.jpg"));
 
 		} catch (Exception e) {
 			System.out.println("Cannot load the provided image");
 		}
 
-		width = imgA.getWidth();
-		height = imgA.getHeight();
+		width = imgA1.getWidth();
+		height = imgA1.getHeight();
 	} // loadImages
 
 	private void setupWindow() {
 		// JPanel and JScrollPane
-		panel.setPreferredSize(new Dimension(WINDOW_X, WINDOW_Y));
         scrollPane = new JScrollPane(panel);
         add(scrollPane, BorderLayout.CENTER);
 		
         // JFrame
 		setTitle("Hybrid Images");
-		setSize(WINDOW_X, WINDOW_Y);
+		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	} // setupWindow
@@ -271,24 +290,41 @@ public class HybridResults extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                int w = width / 2;
-        		int h = height / 2;
-
-        		int x = X_OFFSET;
-        		int y = Y_OFFSET;
+                
+                // Initialize image size and position values, and font
+                int labelIndex = 0;
+                int w = width;
+        		int h = height;
+        		int x = IMAGE_X_OFFSET;
+        		int y = IMAGE_Y_OFFSET;
+        		Font font = new Font("Verdana", Font.PLAIN, 20);
+        		g.setFont(font);
 
         		for (int i = 0; i < hybridImgs.size(); i++) {
+        			// Draw labels and images
+        			g.setColor(Color.BLACK);
+        			if (i % 5 == 0) {
+        				g.drawString(labels[labelIndex], x, y - (LABEL_Y_OFFSET / 4));
+        				labelIndex++;
+        			}
         			g.drawImage(hybridImgs.get(i), x, y, w, h, this);
-        			x += w + X_OFFSET;
+        			
+        			// Set values to next image in row
+        			// And make next image half the size of previous image
+        			x += w + IMAGE_X_OFFSET;
         			w /= 2;
         			h /= 2;
 
         			// Reset values to draw next row of images
+        			// And draw row-separating line
         			if (i == 4 || i == 9 || i == 14 || i == 19) {
-        				w = width / 2;
-        				h = height / 2;
-        				x = X_OFFSET;
-        				y += h + Y_OFFSET;
+        				w = width;
+        				h = height;
+        				x = IMAGE_X_OFFSET;
+        				y += h + (IMAGE_Y_OFFSET / 2);
+        				g.setColor(Color.GRAY);
+        				g.drawLine(0, y, getWidth(), y);
+        				y += IMAGE_Y_OFFSET;
         			} // if
         		} // for
             } // paintComponent
