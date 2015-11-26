@@ -20,64 +20,46 @@ public class HybridProcess extends HybridAbstractClass {
 	private final static int IMAGE_Y_OFFSET = 40;
 	private final static int LABEL_Y_OFFSET = 5;
 
-	private BufferedImage imgA;
-	private BufferedImage imgB;
-	private BufferedImage origFilteredImgA;
-	private BufferedImage origFilteredImgB;
-	private BufferedImage origHybridImg;
-
 	public HybridProcess() {
-		loadImages();
+		String[] imgNames = {"elephant", "jaguar", "filteredElephant", "filteredJaguar", "hybrid"};
+		loadImages(imgNames, false);
+		createHybridImages();
+		super.setupWindow("Hybrid Image Creation Process");
+	} // Constructor
 
+	private void createHybridImages() {
+		BufferedImage imgA = inputImages.get(0);
+		BufferedImage imgB = inputImages.get(1);
+		
+		// Low-frequency image
 		BufferedImage filteredImgA = convolve(imgA, Filters.LOW_FREQ);
+		
+		// High-frequency image
 		BufferedImage filteredImgB1 = convolve(imgB, Filters.HIGH_FREQ);
 		BufferedImage filteredImgB2 = grayscale(imgB);
 		BufferedImage filteredImgB3 = dissolve(filteredImgB2, filteredImgB1, 0.5f);
+		
+		// First hybrid image
 		BufferedImage hybridImg = brighten(dissolve(filteredImgA, filteredImgB3, 0.5f), 1.5f);
+		
+		// Second hybrid image
 		BufferedImage hybridImg2 = dissolve(filteredImgA, filteredImgB2, 0.5f);
 		
 		// Row 1
-		outputImages.add(imgA);
-		outputImages.add(imgB);
+		for (BufferedImage img : inputImages) {
+			outputImages.add(img);
+		}
 
 		// Row 2
-		outputImages.add(origFilteredImgA);
-		outputImages.add(origFilteredImgB);
-		outputImages.add(origHybridImg);
-
-		// Row 3
 		outputImages.add(filteredImgA);
 		outputImages.add(filteredImgB1);
 		outputImages.add(filteredImgB2);
 		outputImages.add(filteredImgB3);
 		outputImages.add(hybridImg);
 		
-		// Row 4
+		// Row 3
 		outputImages.add(hybridImg2);
-
-		setupWindow();
-	} // Constructor
-	
-	///////////////////////////////////////// Setup /////////////////////////////////////////
-
-	private void loadImages() {
-		try {
-			imgA = ImageIO.read(new File("elephant.png"));
-			imgB = ImageIO.read(new File("jaguar.png"));
-			origFilteredImgA = ImageIO.read(new File("filteredElephant.png"));
-			origFilteredImgB = ImageIO.read(new File("filteredJaguar.png"));
-			origHybridImg = ImageIO.read(new File("hybrid.png"));
-		} catch (Exception e) {
-			System.out.println("Cannot load the provided image");
-		}
-
-		width = imgA.getWidth();
-		height = imgA.getHeight();
-	}
-
-	private void setupWindow() {
-		super.setupWindow("Hybrid Image Creation Process");
-	}
+	} // createHybridImages
 
 	///////////////////////////////////////// Display /////////////////////////////////////////
 

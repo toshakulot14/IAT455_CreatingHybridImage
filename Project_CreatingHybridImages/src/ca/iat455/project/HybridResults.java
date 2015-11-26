@@ -34,7 +34,7 @@ public class HybridResults extends HybridAbstractClass {
 
 	public HybridResults() {
 		String[] imgNames = {"lion", "tiger"};
-		loadImages(imgNames);
+		loadImages(imgNames, true);
 		
 		for (int i = 0; i < inputImages.size(); i += 2) {
 			createHybridImage(inputImages.get(i), inputImages.get(i + 1));

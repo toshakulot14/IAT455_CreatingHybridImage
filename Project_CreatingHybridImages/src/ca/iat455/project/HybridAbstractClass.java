@@ -1,6 +1,5 @@
 package ca.iat455.project;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -10,7 +9,6 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 
 /**
  * This class provides the fields and methods to produce a hybrid image and
@@ -207,14 +205,17 @@ public class HybridAbstractClass extends JFrame {
 	
 	///////////////////////////////////////// Setup /////////////////////////////////////////
 	
-	protected void loadImages(String[] imgNames) {
+	protected void loadImages(String[] imgNames, boolean isJPG) {
 		try {
+			String extension = (isJPG) ? ".jpg" : ".png";
+			
 			for (String name : imgNames) {
-				BufferedImage img = ImageIO.read(new File(name + ".jpg"));
+				File file = new File(name + extension);
+				BufferedImage img = ImageIO.read(file);
 				inputImages.add(img);
 			}
 		} catch (Exception e) {
-			System.out.println("Cannot load the provided image");
+			System.out.println("Cannot load image");
 		}
 
 		BufferedImage img = inputImages.get(0);
