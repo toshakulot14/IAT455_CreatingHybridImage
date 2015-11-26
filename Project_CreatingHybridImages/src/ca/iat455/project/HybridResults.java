@@ -123,7 +123,12 @@ public class HybridResults extends HybridAbstractClass {
             				g.drawLine(0, y, getWidth(), y);
             				y += IMAGE_Y_OFFSET;
             			}
-        			}
+        			} else {
+        				if (i % 2 == 0) {
+        					x = IMAGE_X_OFFSET;
+        					y += h + IMAGE_Y_OFFSET;
+        				}
+        			} // if
         		} // for
         		
         		revalidate();
@@ -144,7 +149,7 @@ public class HybridResults extends HybridAbstractClass {
 	///////////////////////////////////////// Menu Setup /////////////////////////////////////////
 	
 	private void setupMenu() {
-		addMenuItem("Open...", "Open file");
+		addMenuItem("Open...", "Select two images from your computer to produce your own hybrid image");
 		addMenuItem("Exit", "Exit application");
 		menuBar.add(menu);
 		setJMenuBar(menuBar);
@@ -220,8 +225,10 @@ public class HybridResults extends HybridAbstractClass {
 				// Produce hybrid image if user's source images are the same size
 				if (img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight()) {
 					isUserInput = true;
-					width = img1.getWidth();
-					height = img1.getHeight();
+					
+					// Adjust image sizes for display
+					width = img1.getWidth() / 3;
+					height = img1.getHeight() / 3;
 					
 					ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, true);
 					outputImages.clear();
