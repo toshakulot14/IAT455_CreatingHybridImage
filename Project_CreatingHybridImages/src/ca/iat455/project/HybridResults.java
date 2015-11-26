@@ -11,12 +11,14 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -38,12 +40,9 @@ public class HybridResults extends HybridAbstractClass {
 	private final static int IMAGES_PER_ROW = 4;
 
 	// Fields for output display
-	private JPanel panel;
-	private JScrollPane scrollPane;
-	
-	// Fields for user input images
-	private BufferedImage img1;
-	private BufferedImage img2;
+	private JPanel demoPanel;
+	private JScrollPane demoScrollPane;
+	private boolean isUserInput = false;
 	
 	// Fields for menu
 	private JMenuBar menuBar = new JMenuBar();
@@ -73,7 +72,7 @@ public class HybridResults extends HybridAbstractClass {
 	} // createHybridImages
 		
 	private void drawImages() {
-		panel = new JPanel() {
+		demoPanel = new JPanel() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -96,67 +95,53 @@ public class HybridResults extends HybridAbstractClass {
 
         		for (int i = 0; i < outputImages.size(); i++) {
         			// Draw labels and images
-        			g.setColor(Color.BLACK);
-        			if (i % 4 == 0) {
-        				g.drawString(labels[labelIndex], x, y - (LABEL_Y_OFFSET / 4));
-        				labelIndex++;
+        			if (!isUserInput) {
+	        			g.setColor(Color.BLACK);
+	        			if (i % 4 == 0) {
+	        				g.drawString(labels[labelIndex], x, y - (LABEL_Y_OFFSET / 4));
+	        				labelIndex++;
+	        			}
         			}
         			g.drawImage(outputImages.get(i), x, y, w, h, this);
         			
         			// Set values to next image in row
         			// And make next image half the size of previous image
         			x += w + IMAGE_X_OFFSET;
-        			w /= 2;
-        			h /= 2;
-
-        			// Reset values to draw next row of images
-        			// And draw row-separating line
-        			if (i == 3 || i == 7) {
-        				w = width;
-        				h = height;
-        				x = IMAGE_X_OFFSET;
-        				y += h + (IMAGE_Y_OFFSET / 2);
-        				g.setColor(Color.GRAY);
-        				g.drawLine(0, y, getWidth(), y);
-        				y += IMAGE_Y_OFFSET;
+        			
+        			if (!isUserInput) {
+        				w /= 2;
+        				h /= 2;
+        				
+        				// Reset values to draw next row of images
+            			// And draw row-separating line
+            			if (i == 3 || i == 7) {
+            				w = width;
+            				h = height;
+            				x = IMAGE_X_OFFSET;
+            				y += h + (IMAGE_Y_OFFSET / 2);
+            				g.setColor(Color.GRAY);
+            				g.drawLine(0, y, getWidth(), y);
+            				y += IMAGE_Y_OFFSET;
+            			}
         			}
         		} // for
+        		
+        		revalidate();
+				repaint();
             } // paintComponent
         }; // JPanel
 	} // drawImages
 	
-	private void setupWindow() {
-		panel.setPreferredSize(PANEL_SIZE);
-		scrollPane = new JScrollPane(panel);
-		add(scrollPane, BorderLayout.CENTER);
-		super.setupWindow("Hybrid Image Comparison");
-	} // setupWindow
+	///////////////////////////////////////// Window Setup /////////////////////////////////////////
 	
-	private void setupMenuListener() {
-		menuListener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (e.getActionCommand().equals("Open...")) {
-					img1 = selectImage("Select first source image");
-					if (img1 != null) {
-						img2 = selectImage("Select second source image");
-					}
-				} else if (e.getActionCommand().equals("Exit")) {
-					System.exit(0);
-				}
-			}
-		};
-		
-		menu.setMnemonic(KeyEvent.VK_F);
-		for (int i = 0; i < menu.getItemCount(); i++) {
-			JMenuItem item = menu.getItem(i);
-			if (item.getText().equals("Open..."))
-				item.setMnemonic(KeyEvent.VK_O);
-			else
-				item.setMnemonic(KeyEvent.VK_E);
-			item.addActionListener(menuListener);
-		}
+	private void setupWindow() {
+		demoPanel.setPreferredSize(PANEL_SIZE);
+		demoScrollPane = new JScrollPane(demoPanel);
+		add(demoScrollPane, BorderLayout.CENTER);
+		super.setupWindow("Hybrid Image Comparison");
 	}
+	
+	///////////////////////////////////////// Menu Setup /////////////////////////////////////////
 	
 	private void setupMenu() {
 		addMenuItem("Open...", "Open file");
@@ -170,6 +155,31 @@ public class HybridResults extends HybridAbstractClass {
 		item.setToolTipText(tooltip);
 		menu.add(item);
 	}
+	
+	private void setupMenuListener() {
+		menuListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getActionCommand().equals("Open...")) {
+					processUserImages();
+				} else if (e.getActionCommand().equals("Exit")) {
+					System.exit(0);
+				}
+			} // actionperformed
+		}; // menuListener
+		
+		menu.setMnemonic(KeyEvent.VK_F);
+		for (int i = 0; i < menu.getItemCount(); i++) {
+			JMenuItem item = menu.getItem(i);
+			if (item.getText().equals("Open..."))
+				item.setMnemonic(KeyEvent.VK_O);
+			else
+				item.setMnemonic(KeyEvent.VK_E);
+			item.addActionListener(menuListener);
+		} // for
+	} // setupMenuListener
+	
+	///////////////////////////////////////// User Image Selection/Processing /////////////////////////////////////////
 	
 	private BufferedImage selectImage(String title) {
 		BufferedImage img = null;
@@ -198,4 +208,34 @@ public class HybridResults extends HybridAbstractClass {
 
 		return img;
 	} // selectImage
+	
+	private void processUserImages() {
+		BufferedImage img1, img2;
+		
+		img1 = selectImage("Select first source image");
+		if (img1 != null) {
+			img2 = selectImage("Select second source image");
+			
+			if (img2 != null) {
+				// Produce hybrid image if user's source images are the same size
+				if (img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight()) {
+					isUserInput = true;
+					width = img1.getWidth();
+					height = img1.getHeight();
+					
+					ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, true);
+					outputImages.clear();
+					outputImages.add(img1);
+					outputImages.add(img2);
+					outputImages.addAll(processImages);
+					
+					// Update the window
+					drawImages();
+				} else {
+					JOptionPane.showMessageDialog(null,
+							"Selected images are not the same size. Please try again.");
+				}
+			} // if img2 != null
+		} // if img1 != null
+	} // processUserImages
 } // TestHybrid
