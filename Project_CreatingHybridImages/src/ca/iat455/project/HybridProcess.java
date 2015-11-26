@@ -43,8 +43,8 @@ public class HybridProcess extends Frame {
 	public HybridProcess() {
 		loadImages();
 
-		filteredImgA = convolve(imgA, Filters.BLUR);
-		filteredImgB1 = convolve(imgB, Filters.GAUSSIAN_DERIV);
+		filteredImgA = convolve(imgA, Filters.LOW_FREQ);
+		filteredImgB1 = convolve(imgB, Filters.HIGH_FREQ);
 		filteredImgB2 = greyscale(imgB);
 		filteredImgB3 = dissolve(filteredImgB2, filteredImgB1, 0.5f);
 		hybridImg = brighten(dissolve(filteredImgA, filteredImgB3, 0.5f), 1.5f);
@@ -96,10 +96,10 @@ public class HybridProcess extends Frame {
 		int kernelSize; // apparently different from sigma?
 
 		switch (filter) {
-		case BLUR:
+		case LOW_FREQ:
 			kernelSize = 7;
 			break;
-		case GAUSSIAN_DERIV:
+		case HIGH_FREQ:
 			kernelSize = 3;
 			break;
 		default:
@@ -113,12 +113,12 @@ public class HybridProcess extends Frame {
 				ArrayList<Integer> rgbs = new ArrayList<Integer>();
 
 				switch (filter) {
-				case BLUR:
+				case LOW_FREQ:
 					int[] indicesBlur = { x - 3, x - 2, x - 1, x, x + 1, x + 2, x + 3, y - 3, y - 2, y - 1, y, y + 1,
 							y + 2, y + 3 };
 					rgbs = getRGBs(img, rgbs, indicesBlur);
 					break;
-				case GAUSSIAN_DERIV:
+				case HIGH_FREQ:
 					int[] indicesEdge = { x - 1, x, x + 1, y - 1, y, y + 1 };
 					rgbs = getRGBs(img, rgbs, indicesEdge);
 					break;
@@ -170,12 +170,12 @@ public class HybridProcess extends Frame {
 		int c = 0;
 
 		switch (filter) {
-		case BLUR:
+		case LOW_FREQ:
 			for (int i = 0; i < channel.size(); i++) {
 				c += channel.get(i);
 			}
 			return c / channel.size();
-		case GAUSSIAN_DERIV:
+		case HIGH_FREQ:
 			int[] sobelFilter = { 1, 2, 1, 0, 0, -0, -1, -2, -1 };
 			for (int i = 0; i < channel.size(); i++) {
 				c += channel.get(i) * sobelFilter[i];
