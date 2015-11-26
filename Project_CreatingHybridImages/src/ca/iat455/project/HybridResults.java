@@ -17,6 +17,7 @@ import javax.swing.JScrollPane;
 
 public class HybridResults extends JFrame {
 	// Constants for output display
+	private final static Dimension PANEL_SIZE = new Dimension(1000, 1700);
 	private final static int LABEL_Y_OFFSET = 50;
 	private final static int IMAGE_X_OFFSET = 10;
 	private final static int IMAGE_Y_OFFSET = 40;
@@ -273,6 +274,7 @@ public class HybridResults extends JFrame {
 
 	private void setupWindow() {
 		// JPanel and JScrollPane
+		panel.setPreferredSize(PANEL_SIZE);
         scrollPane = new JScrollPane(panel);
         add(scrollPane, BorderLayout.CENTER);
 		
@@ -317,7 +319,7 @@ public class HybridResults extends JFrame {
 
         			// Reset values to draw next row of images
         			// And draw row-separating line
-        			if (i == 4 || i == 9 || i == 14 || i == 19) {
+        			if (i == 4 || i == 9 || i == 14) {
         				w = width;
         				h = height;
         				x = IMAGE_X_OFFSET;
