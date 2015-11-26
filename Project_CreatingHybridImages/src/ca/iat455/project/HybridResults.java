@@ -19,6 +19,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * This class shows three different sets of hybrid images, using different source
@@ -136,7 +137,10 @@ public class HybridResults extends HybridAbstractClass {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("Open...")) {
-					selectImage();
+					img1 = selectImage("Select first source image");
+					if (img1 != null) {
+						img2 = selectImage("Select second source image");
+					}
 				} else if (e.getActionCommand().equals("Exit")) {
 					System.exit(0);
 				}
@@ -167,13 +171,18 @@ public class HybridResults extends HybridAbstractClass {
 		menu.add(item);
 	}
 	
-	private BufferedImage selectImage() {
+	private BufferedImage selectImage(String title) {
 		BufferedImage img = null;
 
+		// Setup chooser
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-		chooser.setDialogTitle("Select an Image");
-
+		chooser.setDialogTitle(title);
+		
+		// Setup image filter
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "png", "gif", "jpeg");
+		chooser.setFileFilter(filter);
+		
 		int returnVal = chooser.showOpenDialog(this);
 		File file = null;
 
