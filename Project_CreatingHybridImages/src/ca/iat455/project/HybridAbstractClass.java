@@ -3,9 +3,11 @@ package ca.iat455.project;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.File;
 import java.util.ArrayList;
+
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -24,26 +26,41 @@ public class HybridAbstractClass extends JFrame {
 	protected ArrayList<BufferedImage> outputImages = new ArrayList<BufferedImage>();
 	protected int width, height;
 	
+	float[] LOW_PASS = {1/16f, 1/8f, 1/16f,
+						1/8f, 1/4f, 1/8f,
+						1/16f, 1/8f, 1/16f};
+	float[] HIGH_PASS = { 1, 2, 1,
+						  0, 0, 0,
+						 -1, -2, -1 }; //top sobel
+	
+	float DISSOLVE_AMOUNT = 0.5f;
+	
 	///////////////////////////////////////// Process /////////////////////////////////////////
 	
-	protected ArrayList<BufferedImage> createHybridImage(BufferedImage img1, BufferedImage img2, boolean isTest) {
+	protected ArrayList<BufferedImage> createHybridImage(BufferedImage img1, BufferedImage img2, boolean isTest, float[] filter) {
 		ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
+		
+		HIGH_PASS = filter;
 		
 		// Low frequency image
 		BufferedImage filteredImg1;
-		if (!isTest) {
-			filteredImg1 = grayscale(convolve(img1, Filters.LOW_FREQ));
-		} else {
-			filteredImg1 = convolve(img1, Filters.LOW_FREQ);
-		}
+//		if (!isTest) {
+//			filteredImg1 = grayscale(convolve(img1, Filters.LOW_FREQ));
+//		} else {
+//			filteredImg1 = convolve(img1, Filters.LOW_FREQ);
+//		}
+		
+		filteredImg1 = convolve(img1, LOW_PASS, 3, 3);
+		filteredImg1 = grayscale(filteredImg1);
 		
 		// High frequency image
-		BufferedImage filteredImg2a = convolve(img2, Filters.HIGH_FREQ);
+//		BufferedImage filteredImg2a = convolve(img2, Filters.HIGH_FREQ);
+		BufferedImage filteredImg2a = convolve(img2, HIGH_PASS, 3, 3);
 		BufferedImage filteredImg2b = grayscale(img2);
-		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, 0.5f);
-		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
 		
 		// Hybrid image
+		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, DISSOLVE_AMOUNT);
+		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
 		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2c, 0.5f);
 		
 		if (isTest) {
@@ -58,110 +75,131 @@ public class HybridAbstractClass extends JFrame {
 		return images;
 	} // createHybridImage
 	
-	public BufferedImage convolve(BufferedImage img, Filters filter) {
-		WritableRaster wRaster = img.copyData(null);
-		BufferedImage result = new BufferedImage(img.getColorModel(), wRaster, img.isAlphaPremultiplied(), null);
+	protected BufferedImage convolve(BufferedImage img, float[] kernel, int filterWidth, int filterHeight){
+		BufferedImage result = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
 
-		// Determine kernel size
-		int kernelSize;
-		switch (filter) {
-		case LOW_FREQ:
-			kernelSize = 7;
-			break;
-		case HIGH_FREQ:
-			kernelSize = 3;
-			break;
-		default:
-			kernelSize = 0;
-			break;
-		} // switch
-
-		// Apply spatial convolution to image
-		int edge = kernelSize / 2;
-		for (int x = edge; x < result.getWidth() - edge; x++) {
-			for (int y = edge; y < result.getHeight() - edge; y++) {
-				ArrayList<Integer> rgbs = new ArrayList<Integer>();
-
-				switch (filter) {
-				case LOW_FREQ:
-					int[] indicesBlur = { x-3, x-2, x-1, x, x+1, x+2, x+3,
-										  y-3, y-2, y-1, y, y+1, y+2, y+3 };
-					rgbs = getRGBs(img, rgbs, indicesBlur);
-					break;
-				case HIGH_FREQ:
-					int[] indicesEdge = { x-1, x, x+1,
-										  y-1, y, y+1 };
-					rgbs = getRGBs(img, rgbs, indicesEdge);
-					break;
-				default:
-					break;
-				} // switch
-
-				result.setRGB(x, y, computeRGB(rgbs, filter));
-			}
-		}
+		Kernel k = createKernel(kernel, filterWidth, filterHeight);
+		ConvolveOp op = createConvolveOp(k);
+		result = op.filter(img, null);
+		
 		return result;
 	} // convolve
-
-	public ArrayList<Integer> getRGBs(BufferedImage img, ArrayList<Integer> rgbs, int[] indices) {
-		// Determine the boundaries between x and y in the array parameter
-		int xBegin = 0;
-		int xEnd = indices.length / 2 - 1;
-		int yBegin = indices.length / 2;
-		int yEnd = indices.length - 1;
-
-		// Get the RGB values of the kernel's pixels
-		for (int x = xBegin; x <= xEnd; x++) {
-			for (int y = yBegin; y <= yEnd; y++) {
-				rgbs.add(img.getRGB(indices[x], indices[y]));
-			}
-		}
-
-		return rgbs;
-	} // getRGBs
-
-	public int computeRGB(ArrayList<Integer> rgbs, Filters filter) {
-		ArrayList<Integer> reds = new ArrayList<Integer>();
-		ArrayList<Integer> greens = new ArrayList<Integer>();
-		ArrayList<Integer> blues = new ArrayList<Integer>();
-
-		// Separate all of the kernel pixels' channels
-		for (int i = 0; i < rgbs.size(); i++) {
-			int rgb = rgbs.get(i);
-			reds.add(getRed(rgb));
-			greens.add(getGreen(rgb));
-			blues.add(getBlue(rgb));
-		}
-
-		// Apply filter to each channel
-		int r = convolveChannel(reds, filter);
-		int g = convolveChannel(greens, filter);
-		int b = convolveChannel(blues, filter);
-
-		return new Color(r, g, b).getRGB();
-	} // computeRGB
-
-	public int convolveChannel(ArrayList<Integer> channel, Filters filter) {
-		int c = 0;
-
-		switch (filter) {
-		case LOW_FREQ:
-			// Blur: Average the pixels
-			for (int i = 0; i < channel.size(); i++) {
-				c += channel.get(i);
-			}
-			return c / channel.size();
-		case HIGH_FREQ:
-			// Gaussian derivative? Multiply kernel with Sobel (edge-emphasizing) filter
-			int[] sobelFilter = { 1, 2, 1, 0, 0, -0, -1, -2, -1 };
-			for (int i = 0; i < channel.size(); i++) {
-				c += channel.get(i) * sobelFilter[i];
-			}
-			return clip(c);
-		default:
-			return 0;
-		}
-	} // convolveChannel
+	
+	private Kernel createKernel(float[] filter, int width, int height){
+		return new Kernel(3, 3, filter);
+	}
+	
+	private ConvolveOp createConvolveOp(Kernel k){
+		return new ConvolveOp(k);
+	}
+	
+//	public BufferedImage convolve(BufferedImage img, Filters filter) {
+//		WritableRaster wRaster = img.copyData(null);
+//		BufferedImage result = new BufferedImage(img.getColorModel(), wRaster, img.isAlphaPremultiplied(), null);
+//
+//		// Determine kernel size
+//		int kernelSize;
+//		switch (filter) {
+//		case LOW_FREQ:
+//			kernelSize = 7;
+//			break;
+//		case HIGH_FREQ:
+//			kernelSize = 3;
+//			break;
+//		default:
+//			kernelSize = 0;
+//			break;
+//		} // switch
+//
+//		// Apply spatial convolution to image
+//		int edge = kernelSize / 2;
+//		for (int x = edge; x < result.getWidth() - edge; x++) {
+//			for (int y = edge; y < result.getHeight() - edge; y++) {
+//				ArrayList<Integer> rgbs = new ArrayList<Integer>();
+//
+//				switch (filter) {
+//				case LOW_FREQ:
+//					int[] indicesBlur = { x-3, x-2, x-1, x, x+1, x+2, x+3,
+//										  y-3, y-2, y-1, y, y+1, y+2, y+3 };
+//					rgbs = getRGBs(img, rgbs, indicesBlur);
+//					break;
+//				case HIGH_FREQ:
+//					int[] indicesEdge = { x-1, x, x+1,
+//										  y-1, y, y+1 };
+//					rgbs = getRGBs(img, rgbs, indicesEdge);
+//					break;
+//				default:
+//					break;
+//				} // switch
+//
+//				result.setRGB(x, y, computeRGB(rgbs, filter));
+//			}
+//		}
+//		return result;
+//	} // convolve
+//
+//	public ArrayList<Integer> getRGBs(BufferedImage img, ArrayList<Integer> rgbs, int[] indices) {
+//		// Determine the boundaries between x and y in the array parameter
+//		int xBegin = 0;
+//		int xEnd = indices.length / 2 - 1;
+//		int yBegin = indices.length / 2;
+//		int yEnd = indices.length - 1;
+//
+//		// Get the RGB values of the kernel's pixels
+//		for (int x = xBegin; x <= xEnd; x++) {
+//			for (int y = yBegin; y <= yEnd; y++) {
+//				rgbs.add(img.getRGB(indices[x], indices[y]));
+//			}
+//		}
+//
+//		return rgbs;
+//	} // getRGBs
+//
+//	public int computeRGB(ArrayList<Integer> rgbs, Filters filter) {
+//		ArrayList<Integer> reds = new ArrayList<Integer>();
+//		ArrayList<Integer> greens = new ArrayList<Integer>();
+//		ArrayList<Integer> blues = new ArrayList<Integer>();
+//
+//		// Separate all of the kernel pixels' channels
+//		for (int i = 0; i < rgbs.size(); i++) {
+//			int rgb = rgbs.get(i);
+//			reds.add(getRed(rgb));
+//			greens.add(getGreen(rgb));
+//			blues.add(getBlue(rgb));
+//		}
+//
+//		// Apply filter to each channel
+//		int r = convolveChannel(reds, filter);
+//		int g = convolveChannel(greens, filter);
+//		int b = convolveChannel(blues, filter);
+//
+//		return new Color(r, g, b).getRGB();
+//	} // computeRGB
+//
+//	public int convolveChannel(ArrayList<Integer> channel, Filters filter) {
+//		int c = 0;
+//
+//		switch (filter) {
+//		case LOW_FREQ:
+//			// Blur: Average the pixels
+//			for (int i = 0; i < channel.size(); i++) {
+//				c += channel.get(i);
+//			}
+//			return c / channel.size();
+//		case HIGH_FREQ:
+//			// Gaussian derivative? Multiply kernel with Sobel (edge-emphasizing) filter
+//			int[] sobelFilter = { 1, 2, 1, 0, 0, -0, -1, -2, -1 };
+////			float[] sobelFilter = {0 , -1, 0,
+////							   -1, 5, -1,
+////							   0, -1, 0};
+//			for (int i = 0; i < channel.size(); i++) {
+//				c += channel.get(i) * sobelFilter[i];
+//			}
+//			return clip(c);
+//		default:
+//			return 0;
+//		}
+//	} // convolveChannel
 
 	public BufferedImage grayscale(BufferedImage img) {
 		BufferedImage result = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
@@ -179,8 +217,7 @@ public class HybridAbstractClass extends JFrame {
 	} // grayscale
 
 	public BufferedImage dissolve(BufferedImage imgA, BufferedImage imgB, float mixVal) {
-		WritableRaster wRaster = imgA.copyData(null);
-		BufferedImage result = new BufferedImage(imgA.getColorModel(), wRaster, imgA.isAlphaPremultiplied(), null);
+		BufferedImage result = new BufferedImage(imgA.getWidth(), imgA.getHeight(), imgA.getType());
 
 		for (int x = 0; x < result.getWidth(); x++) {
 			for (int y = 0; y < result.getHeight(); y++) {
@@ -234,6 +271,10 @@ public class HybridAbstractClass extends JFrame {
 	protected int getBlue(int rgb) {
 		return new Color(rgb).getBlue();
 	}
+	
+	protected void setFilter(float[] filter){
+		HIGH_PASS = filter;
+	} // TestHybrid
 	
 	///////////////////////////////////////// Setup /////////////////////////////////////////
 	

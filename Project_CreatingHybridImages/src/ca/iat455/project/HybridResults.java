@@ -5,8 +5,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -37,16 +41,18 @@ public class HybridResults extends HybridAbstractClass {
 		createHybridImages();
 		drawImages();
 		setupWindow();
+		System.out.println(outputImages.size());
 	} // Constructor
 	
 	private void createHybridImages() {
 		for (int i = 0; i < inputImages.size(); i += 2) {
-			BufferedImage hybridImg = createHybridImage(inputImages.get(i), inputImages.get(i + 1), false).get(0);
+			BufferedImage hybridImg = createHybridImage(inputImages.get(i), inputImages.get(i + 1), false, HIGH_PASS).get(0);
 			
 			// Add hybrid image to ArrayList for output display
 			for (int j = 0; j < IMAGES_PER_ROW; j++) {
 				outputImages.add(hybridImg);
 			}
+			
 		}
 	} // createHybridImages
 		
@@ -102,11 +108,50 @@ public class HybridResults extends HybridAbstractClass {
             } // paintComponent
         }; // JPanel
 	} // drawImages
+
 	
 	private void setupWindow() {
 		panel.setPreferredSize(PANEL_SIZE);
 		scrollPane = new JScrollPane(panel);
 		add(scrollPane, BorderLayout.CENTER);
+		////////
+		
+		String[] filters = {"Emboss", "Sharpen", "Top Sobel", "Right Sobel"};
+		JComboBox<String> filterSelector = new JComboBox<String>(filters);
+		filterSelector.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e){
+				String str = (String) filterSelector.getSelectedItem();
+				
+				float[] filter = new float[9];
+				if(str.equals(filters[0])){
+					float[] tmp = {-2, -1, 0, -1, 1, 0, 0, 1, 2};
+					filter = tmp;
+				} else if(str.equals(filters[1])){
+					float[] tmp = {0, -1 ,0, -1, 4, -1, 0, -1, 0};
+					filter = tmp;
+				} else if(str.equals(filters[2])){
+					float[] tmp = {1, 2, 1 , 0, 0 ,0, -1, -2, -1};
+					filter = tmp;
+				} else if(str.equals(filters[3])){
+					float[] tmp = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+					filter = tmp;
+				}
+				setFilter(filter);
+				outputImages = new ArrayList<BufferedImage>();
+				createHybridImages();
+				panel.revalidate();
+				panel.repaint();
+			
+			}//anonymous listener	
+		}); //fileSelector
+		
+		
+		add(filterSelector, BorderLayout.NORTH);
+		
+		
 		super.setupWindow("Hybrid Image Comparison");
 	} // setupWindow
-} // TestHybrid
+	
+
+}

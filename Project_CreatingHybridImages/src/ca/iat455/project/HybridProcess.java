@@ -34,13 +34,13 @@ public class HybridProcess extends HybridAbstractClass {
 		// Attempt #1
 		BufferedImage img1 = inputImages.get(0);
 		BufferedImage img2 = inputImages.get(1);
-		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, true);
+		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, true, HIGH_PASS);
 		outputImages.addAll(processImages);
 		
 		// Attempt #2
-		BufferedImage filteredImg1 = convolve(img1, Filters.LOW_FREQ);
+		BufferedImage filteredImg1 = convolve(img1, LOW_PASS, 3, 3);
 		BufferedImage filteredImg2 = grayscale(img2);
-		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2, 0.5f);
+		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2, DISSOLVE_AMOUNT);
 		outputImages.add(filteredImg1);
 		outputImages.add(filteredImg2);
 		outputImages.add(hybridImg);
