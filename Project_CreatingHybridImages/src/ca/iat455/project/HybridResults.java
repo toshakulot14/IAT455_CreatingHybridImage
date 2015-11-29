@@ -3,14 +3,21 @@ package ca.iat455.project;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -41,7 +48,6 @@ public class HybridResults extends HybridAbstractClass {
 		createHybridImages();
 		drawImages();
 		setupWindow();
-		System.out.println(outputImages.size());
 	} // Constructor
 	
 	private void createHybridImages() {
@@ -138,20 +144,72 @@ public class HybridResults extends HybridAbstractClass {
 					filter = tmp;
 				}
 				setFilter(filter);
-				outputImages = new ArrayList<BufferedImage>();
-				createHybridImages();
-				panel.revalidate();
-				panel.repaint();
+
+				update();
 			
 			}//anonymous listener	
 		}); //fileSelector
 		
+		//create browse buttons
+		ArrayList<JButton> btnList = new ArrayList<JButton>();
+		for(int i=0; i < inputImages.size(); i++){
+			btnList.add(createBrowseBtn(inputImages, i));
+		}
 		
-		add(filterSelector, BorderLayout.NORTH);
+		//create panel to hold buttons
+		JPanel btnPanel = new JPanel(new FlowLayout());
+		for(int i=0; i < inputImages.size(); i++){
+			btnPanel.add(btnList.get(i));
+		}		
 		
+		//create panel for BorderNorth
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(filterSelector, BorderLayout.CENTER);
+		panel.add(btnPanel, BorderLayout.NORTH);
+		
+		add(panel, BorderLayout.NORTH);
 		
 		super.setupWindow("Hybrid Image Comparison");
 	} // setupWindow
-	
 
+	
+	//TODO: MUST THROW ERROR WHEN INCORRECT IMG DIMENSIONS
+	private JButton createBrowseBtn(ArrayList<BufferedImage> list, int inputImagesIndex) {
+		JButton browseBtn = new JButton("Image " + inputImagesIndex);
+		
+		browseBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser();
+				int result = fc.showOpenDialog(null);
+				
+				if (result == JFileChooser.APPROVE_OPTION) {
+				    File file = fc.getSelectedFile(); 
+				    try {
+						BufferedImage newInput = ImageIO.read(file);
+						System.out.println(inputImagesIndex);
+						list.set(inputImagesIndex, newInput);	//bind input to button
+						
+						String msg = file.getName() + " read successfully";
+						JOptionPane.showMessageDialog(null, msg);
+						System.out.println(list.size());
+						update();
+					} catch (IOException e1) {
+						JOptionPane.showMessageDialog(null, "Error reading image.");
+						e1.printStackTrace();
+					}
+				}//end if
+
+			}//end anonymous listener
+		});
+		
+		return browseBtn;
+	}
+	
+	
+	private void update(){
+		outputImages = new ArrayList<BufferedImage>();	//clear output images
+		createHybridImages();
+		panel.revalidate();
+		panel.repaint();
+	}
 }

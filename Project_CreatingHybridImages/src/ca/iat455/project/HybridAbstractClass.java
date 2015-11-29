@@ -34,6 +34,7 @@ public class HybridAbstractClass extends JFrame {
 						 -1, -2, -1 }; //top sobel
 	
 	float DISSOLVE_AMOUNT = 0.5f;
+	float BRIGHTNESS_AMOUNT = 1.5f;
 	
 	///////////////////////////////////////// Process /////////////////////////////////////////
 	
@@ -60,9 +61,11 @@ public class HybridAbstractClass extends JFrame {
 		
 		// Hybrid image
 		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, DISSOLVE_AMOUNT);
-		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
-		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2c, 0.5f);
-		
+		System.out.println("success 2c");
+		BufferedImage filteredImg2d = brighten(filteredImg2c, BRIGHTNESS_AMOUNT);
+		System.out.println("success 2d");
+		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2c, DISSOLVE_AMOUNT);
+		System.out.println("success hybrid");
 		if (isTest) {
 			images.add(filteredImg1);
 			images.add(filteredImg2a);
