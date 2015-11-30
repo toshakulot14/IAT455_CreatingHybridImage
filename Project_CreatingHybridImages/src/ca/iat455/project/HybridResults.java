@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -39,6 +40,7 @@ public class HybridResults extends HybridAbstractClass {
 
 	// Fields for output display
 	private JPanel panel;
+	private JPanel panel2;
 	private JScrollPane scrollPane;
 	
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -169,6 +171,44 @@ public class HybridResults extends HybridAbstractClass {
 		
 		add(panel, BorderLayout.NORTH);
 		
+		//////
+		
+		panel2 = new JPanel(){
+			private static final long serialVersionUID = 1L;
+
+			@Override
+	        protected void paintComponent(Graphics g) {
+	            super.paintComponent(g);
+	            
+	            int w = width;
+	    		int h = height;
+	    		int x = 0;
+	    		int y = 0;
+	
+	    		//labels
+	    		Font font = new Font("Verdana", Font.PLAIN, 20);
+        		g.setFont(font);
+        		String[] labels = {  "Image 0",
+									 "Image 1",
+									 "Image 2",
+									 "Image 3",
+									 "Image 4",
+									 "Image 5"};
+	    		
+	    		for (int i = 0; i < inputImages.size(); i++) {
+	    			// Draw labels and images
+	    			int init = 20;
+	    			g.drawImage(inputImages.get(i), x, y+init+(i*20)+5, w/3, h/3, this);
+	    			g.drawString(labels[i], x, y+init+(i*20));
+
+	    			y += h/3 + 10;
+	    		} //for
+			} // paintComponent	
+		};
+		panel2.setPreferredSize(new Dimension(width/3+10, 1250));
+		JScrollPane scrollPane2 = new JScrollPane(panel2);
+		
+		add(scrollPane2, BorderLayout.EAST);
 		super.setupWindow("Hybrid Image Comparison");
 	} // setupWindow
 
@@ -186,13 +226,18 @@ public class HybridResults extends HybridAbstractClass {
 				    File file = fc.getSelectedFile(); 
 				    try {
 						BufferedImage newInput = ImageIO.read(file);
-						System.out.println(inputImagesIndex);
-						list.set(inputImagesIndex, newInput);	//bind input to button
 						
-						String msg = file.getName() + " read successfully";
-						JOptionPane.showMessageDialog(null, msg);
-						System.out.println(list.size());
-						update();
+						if(newInput.getWidth() == width || newInput.getHeight() == height){
+							list.set(inputImagesIndex, newInput);	//bind input to button
+							
+							String msg = file.getName() + " read successfully";
+							JOptionPane.showMessageDialog(null, msg);
+							update();							
+						} else {
+							String msg = "Dimensions of the image do not match. Images must be " + width + "x" + height;
+							JOptionPane.showMessageDialog(null, msg);
+						}
+						
 					} catch (IOException e1) {
 						JOptionPane.showMessageDialog(null, "Error reading image.");
 						e1.printStackTrace();
@@ -207,7 +252,7 @@ public class HybridResults extends HybridAbstractClass {
 	
 	
 	private void update(){
-		outputImages = new ArrayList<BufferedImage>();	//clear output images
+		outputImages = new ArrayList<BufferedImage>();	//reset output images
 		createHybridImages();
 		panel.revalidate();
 		panel.repaint();
