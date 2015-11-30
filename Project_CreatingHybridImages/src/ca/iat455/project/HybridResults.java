@@ -82,9 +82,9 @@ public class HybridResults extends HybridAbstractClass {
         		// Set labels
         		Font font = new Font("Verdana", Font.PLAIN, 20);
         		g.setFont(font);
-        		String[] labels = {  "Similar shape and alignment",
-									 "Similar shape, different alignment",
-									 "Different shape and alignment" };
+        		String[] labels = {  "Similar shape and alignment (Image 1 and 2 Hybrid)",
+									 "Similar shape, different alignment (Image 3 and 4 Hybrid)",
+									 "Different shape and alignment (Image 5 and 6 Hybrid)" };
 
         		for (int i = 0; i < outputImages.size(); i++) {
         			// Draw labels and images
@@ -188,12 +188,12 @@ public class HybridResults extends HybridAbstractClass {
 	    		//labels
 	    		Font font = new Font("Verdana", Font.PLAIN, 20);
         		g.setFont(font);
-        		String[] labels = {  "Image 0",
-									 "Image 1",
+        		String[] labels = {  "Image 1",
 									 "Image 2",
 									 "Image 3",
 									 "Image 4",
-									 "Image 5"};
+									 "Image 5",
+									 "Image 6"};
 	    		
 	    		for (int i = 0; i < inputImages.size(); i++) {
 	    			// Draw labels and images
@@ -204,6 +204,8 @@ public class HybridResults extends HybridAbstractClass {
 	    			y += h/3 + 10;
 	    		} //for
 			} // paintComponent	
+			
+			
 		};
 		panel2.setPreferredSize(new Dimension(width/3+10, 1250));
 		JScrollPane scrollPane2 = new JScrollPane(panel2);
@@ -215,7 +217,7 @@ public class HybridResults extends HybridAbstractClass {
 	
 	//TODO: MUST THROW ERROR WHEN INCORRECT IMG DIMENSIONS
 	private JButton createBrowseBtn(ArrayList<BufferedImage> list, int inputImagesIndex) {
-		JButton browseBtn = new JButton("Image " + inputImagesIndex);
+		JButton browseBtn = new JButton("Image " + (inputImagesIndex+1));
 		
 		browseBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
@@ -256,5 +258,7 @@ public class HybridResults extends HybridAbstractClass {
 		createHybridImages();
 		panel.revalidate();
 		panel.repaint();
+		panel2.revalidate();
+		panel2.repaint();
 	}
 }
