@@ -298,7 +298,7 @@ public class HybridAbstractClass extends JFrame {
 		
 	protected void setupWindow(String title) {
 		setTitle(title);
-		setMinimumSize(new Dimension(1200, 700));
+		setMinimumSize(new Dimension(1300, 700));
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);

@@ -196,11 +196,18 @@ public class HybridResults extends HybridAbstractClass {
 									 "Image 6"};
 	    		
 	    		for (int i = 0; i < inputImages.size(); i++) {
+		    		g.setColor(Color.BLACK);
+		    		
 	    			// Draw labels and images
 	    			int init = 20;
 	    			g.drawImage(inputImages.get(i), x, y+init+(i*20)+5, w/3, h/3, this);
 	    			g.drawString(labels[i], x, y+init+(i*20));
 
+	    			// draw line
+	    			if(i%2 == 1){
+		    			g.setColor(Color.GRAY);
+		    			g.drawLine(0, y+init+(i*20)+10+h/3, getWidth(), y+init+(i*20)+10+h/3);	    				
+	    			}
 	    			y += h/3 + 10;
 	    		} //for
 			} // paintComponent	
@@ -236,7 +243,7 @@ public class HybridResults extends HybridAbstractClass {
 							JOptionPane.showMessageDialog(null, msg);
 							update();							
 						} else {
-							String msg = "Dimensions of the image do not match. Images must be " + width + "x" + height;
+							String msg = "Dimensions of the image do not match. Images must be " + height + "x" + width;
 							JOptionPane.showMessageDialog(null, msg);
 						}
 						
