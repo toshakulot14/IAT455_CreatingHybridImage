@@ -19,7 +19,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,7 +38,7 @@ public class HybridComparison extends HybridAbstractClass {
 	private final static int IMAGE_X_OFFSET = 10;
 	private final static int IMAGE_Y_OFFSET = 60;
 	private final static int IMAGES_PER_ROW = 4;
-	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "tiger", "lion", "tiger2", "SFU",
+	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "tiger", "lion", "tiger2", "car",
 			"tiger" };
 
 	// Fields for output display
