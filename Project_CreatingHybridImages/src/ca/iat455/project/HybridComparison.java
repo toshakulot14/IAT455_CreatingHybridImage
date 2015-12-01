@@ -28,11 +28,11 @@ import javax.swing.JScrollPane;
  * 
  * @author Melissa Wang & Andy Tang
  */
-public class HybridDisplay extends HybridProcess {	
+public class HybridComparison extends HybridAbstractClass {	
 	private static final long serialVersionUID = 1L;
 	
 	// Constants for output display
-	private final static Dimension PANEL_SIZE = new Dimension(1000, 2210);
+	private final static Dimension PANEL_SIZE = new Dimension(1000, 1300);
 	private final static int LABEL_Y_OFFSET = 50;
 	private final static int IMAGE_X_OFFSET = 10;
 	private final static int IMAGE_Y_OFFSET = 60;
@@ -47,26 +47,26 @@ public class HybridDisplay extends HybridProcess {
 	
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	public HybridDisplay() {
+	public HybridComparison() {
 		loadImages(SOURCE_IMAGE_NAMES);
 		createHybridImages();
 		drawImages();
 		setupWindow();
 	} // Constructor
 	
-	private void createHybridImages() {
-		boolean showProcess = true;
+	@Override
+	protected void createHybridImages() {
 		for (int i = 0; i < inputImages.size(); i += 2) {
 			BufferedImage img1 = inputImages.get(i);
 			BufferedImage img2 = inputImages.get(i + 1);
+			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, false);
 			
-			if (i > 0) {
-				showProcess = false;
-			}
-			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, showProcess);
-			
-			// Add process images
+			// Add images
 			outputImages.addAll(processImages);
+			BufferedImage hybridImg = processImages.get(processImages.size() - 1);
+			for (int j = 0; j < 3; j++) {
+				outputImages.add(hybridImg);
+			}
 		}
 	} // createHybridImages
 		
@@ -80,101 +80,50 @@ public class HybridDisplay extends HybridProcess {
                 
                 // Set image size and position values
                 int labelIndex = 0;
-                int w = width / 2;
-        		int h = height / 2;
+                int w = width;
+        		int h = height;
         		int x = IMAGE_X_OFFSET;
         		int y = IMAGE_Y_OFFSET;
         		
         		// Set labels
         		Font font = new Font("Verdana", Font.PLAIN, 20);
         		g.setFont(font);
-        		String[] labels = {  "Similar shape and alignment (Image 1 and 2 Hybrid)",
-									 "Similar shape, different alignment (Image 3 and 4 Hybrid)",
-									 "Different shape and alignment (Image 5 and 6 Hybrid)" };
+        		String[] labels = {  "Similar shape and alignment (Source 1 & 2)",
+									 "Similar shape, different alignment (Source 3 & 4)",
+									 "Different shape and alignment (Source 5 & 6)" };
 
         		for (int i = 0; i < outputImages.size(); i++) {
-        			// Draw labels and images
         			g.setColor(Color.BLACK);
         			if (i % 4 == 0) {
-//        				g.drawString(labels[labelIndex], x, y - (LABEL_Y_OFFSET / 4));
+        				g.drawString(labels[labelIndex], x, y - (LABEL_Y_OFFSET / 4));
         				labelIndex++;
         			}
         			g.drawImage(outputImages.get(i), x, y, w, h, this);
         			
-        			// Set values to next image in row
+        			// Set position to next image in row
         			x += w + IMAGE_X_OFFSET;
-
-        			/////////
-        			// Reset position values to draw next row of images
-        			if (i == 2 || i == 6) {
-        				x = IMAGE_X_OFFSET;
-        				y += h + IMAGE_Y_OFFSET;
-        			}
         			
-        			// Make next hybrid image half the size of previous image
-        			if (i > 6 && i < 11) {
-        				w /= 2;
-            			h /= 2;
-    				}
-        			
-        			///////// Hybrid images only
-
-        			if (i == 6) { // Row 3
-        				// Reset hybrid image sizes to source image size
+        			// Set next image half the size of previous image
+        			w /= 2;
+    				h /= 2;
+    				
+    				// Reset values to draw next row of images
+        			// And draw row-separating line
+        			if (i == 3 || i == 7) {
         				w = width;
         				h = height;
-        			}
-        			
-    				// Make next hybrid image half the size of previous image
-    				if (i > 12 && i < 17 || i > 18) {
-        				w /= 2;
-            			h /= 2;
-    				}
-        			
-    				// Reset values to start next row
-    				// Make source image half its size
-        			if (i == 10 || i == 16) {
         				x = IMAGE_X_OFFSET;
-        				y += height + IMAGE_Y_OFFSET;
-        				w = width / 2;
-        				h = height / 2;
+        				y += h + (IMAGE_Y_OFFSET / 2);
+        				g.setColor(Color.GRAY);
+        				g.drawLine(0, y, getWidth(), y);
+        				y += IMAGE_Y_OFFSET;
         			}
-        			
-        			// Reset values to start next row
-    				// Make hybrid image full source image size
-        			if (i == 12 || i == 18) {
-        				x = IMAGE_X_OFFSET;
-        				y += h + IMAGE_Y_OFFSET;
-        				w = width;
-        				h = height;
-        			}
-      			
-//        			g.setColor(Color.GRAY);
-//    				g.drawLine(0, y, getWidth(), y);
-//    				y += IMAGE_Y_OFFSET;
         		} // for
             } // paintComponent
         }; // JPanel
 	} // drawImages
 
 	///////////////////////////////////////// Setup /////////////////////////////////////////
-	
-	protected void loadImages(String[] imgNames) {
-		try {
-
-			for (String name : imgNames) {
-				File file = new File(name + ".jpg");
-				BufferedImage img = ImageIO.read(file);
-				inputImages.add(img);
-			}
-			
-			BufferedImage img = inputImages.get(0);
-			width = img.getWidth();
-			height = img.getHeight();
-		} catch (Exception e) {
-			System.out.println("Cannot load image");
-		}
-	} // loadImages
 	
 	private void setupWindow() {
 		panel.setPreferredSize(PANEL_SIZE);
@@ -246,12 +195,10 @@ public class HybridDisplay extends HybridProcess {
 	    		//labels
 	    		Font font = new Font("Verdana", Font.PLAIN, 20);
         		g.setFont(font);
-        		String[] labels = {  "Image 1",
-									 "Image 2",
-									 "Image 3",
-									 "Image 4",
-									 "Image 5",
-									 "Image 6"};
+        		ArrayList<String> labels = new ArrayList<String>();
+        		for (int i=1; i <= inputImages.size(); i++){
+        			labels.add("Source " + i);
+        		}
 	    		
 	    		for (int i = 0; i < inputImages.size(); i++) {
 		    		g.setColor(Color.BLACK);
@@ -259,7 +206,7 @@ public class HybridDisplay extends HybridProcess {
 	    			// Draw labels and images
 	    			int init = 20;
 	    			g.drawImage(inputImages.get(i), x, y+init+(i*20)+5, w/3, h/3, this);
-	    			g.drawString(labels[i], x, y+init+(i*20));
+	    			g.drawString(labels.get(i), x, y+init+(i*20));
 
 	    			// draw line
 	    			if(i%2 == 1){
@@ -273,19 +220,15 @@ public class HybridDisplay extends HybridProcess {
 		};
 		panel2.setPreferredSize(new Dimension(width/3+10, 1250));
 		JScrollPane scrollPane2 = new JScrollPane(panel2);
-		add(scrollPane2, BorderLayout.EAST);
+		add(scrollPane2, BorderLayout.WEST);
 		
-		setTitle("Hybrid Images");
-		setMinimumSize(new Dimension(1300, 700));
-		setExtendedState(JFrame.MAXIMIZED_BOTH);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);
+		super.setupWindow("Hybrid Image Comparison");
 	} // setupWindow
 
 	
 	// TODO: MUST THROW ERROR WHEN INCORRECT IMG DIMENSIONS
 	private JButton createBrowseBtn(ArrayList<BufferedImage> list, int inputImagesIndex) {
-		JButton browseBtn = new JButton("Image " + (inputImagesIndex+1));
+		JButton browseBtn = new JButton("Source " + (inputImagesIndex+1));
 		
 		browseBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {

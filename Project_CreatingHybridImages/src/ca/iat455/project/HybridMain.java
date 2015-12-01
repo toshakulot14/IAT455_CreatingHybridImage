@@ -8,7 +8,10 @@ package ca.iat455.project;
  */
 public class HybridMain {
 	public static void main(String[] args) {
-		HybridDisplay hybridDisplay = new HybridDisplay();
-		hybridDisplay.repaint();
+		HybridProcess hybridProcess = new HybridProcess();
+		hybridProcess.repaint();
+		
+		HybridComparison hybridComparison = new HybridComparison();
+		hybridComparison.repaint();
 	}
 } // HybridMain
