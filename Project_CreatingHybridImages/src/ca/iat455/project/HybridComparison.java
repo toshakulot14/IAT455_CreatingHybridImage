@@ -1,11 +1,13 @@
 package ca.iat455.project;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -186,14 +188,14 @@ public class HybridComparison extends HybridAbstractClass {
 			@Override
 	        protected void paintComponent(Graphics g) {
 	            super.paintComponent(g);
-	            
+	   
 	            int w = width;
 	    		int h = height;
 	    		int x = 0;
 	    		int y = 0;
 	
 	    		//labels
-	    		Font font = new Font("Verdana", Font.PLAIN, 20);
+	    		Font font = new Font("Verdana", Font.PLAIN, 14);
         		g.setFont(font);
         		ArrayList<String> labels = new ArrayList<String>();
         		for (int i=1; i <= inputImages.size(); i++){
@@ -211,9 +213,11 @@ public class HybridComparison extends HybridAbstractClass {
 	    			// draw line
 	    			if(i%2 == 1){
 		    			g.setColor(Color.GRAY);
-		    			g.drawLine(0, y+init+(i*20)+10+h/3, getWidth(), y+init+(i*20)+10+h/3);	    				
+		    			Graphics2D g2d = (Graphics2D) g;
+		    			g2d.setStroke(new BasicStroke(3));
+		    			g.drawLine(0, y+init+(i*20)+20+h/3, getWidth(), y+init+(i*20)+20+h/3);	    				
 	    			}
-	    			y += h/3 + 10;
+	    			y += h/3 + 20;
 	    		} //for
 			} // paintComponent	
 			
