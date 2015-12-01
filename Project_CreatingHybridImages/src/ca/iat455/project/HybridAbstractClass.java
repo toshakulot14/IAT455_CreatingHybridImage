@@ -27,9 +27,9 @@ abstract public class HybridAbstractClass extends JFrame {
 											1/8f, 1/4f, 1/8f,
 											1/16f, 1/8f, 1/16f};
 	protected static float[] HIGH_PASS = { 1, 2, 1,
-				  						0, 0, 0,
-				  						-1, -2, -1 }; //top sobel
-
+				  							0, 0, 0,
+				  							-1, -2, -1 }; //top sobel
+	
 	private static final float DISSOLVE_AMOUNT = 0.5f;
 	
 	// Fields for output display
@@ -52,11 +52,11 @@ abstract public class HybridAbstractClass extends JFrame {
 		BufferedImage filteredImg1b = convolve(filteredImg1a, LOW_PASS, KERNEL_SIZE, KERNEL_SIZE);
 		
 		// High frequency image
-		BufferedImage filteredImg2a = convolve(grayscale(img2), HIGH_PASS, KERNEL_SIZE, KERNEL_SIZE);
-		BufferedImage filteredImg2b = grayscale(img2);
+		BufferedImage filteredImg2a = grayscale(img2);
+		BufferedImage filteredImg2b = convolve(grayscale(img2), HIGH_PASS, KERNEL_SIZE, KERNEL_SIZE);
 		
 		// Hybrid image
-		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, DISSOLVE_AMOUNT);
+		BufferedImage filteredImg2c = dissolve(filteredImg2a, filteredImg2b, DISSOLVE_AMOUNT);
 		BufferedImage hybridImg = dissolve(filteredImg1a, filteredImg2c, DISSOLVE_AMOUNT);
 		
 		// Add process images for display
@@ -89,7 +89,7 @@ abstract public class HybridAbstractClass extends JFrame {
 	}
 	
 	private Kernel createKernel(float[] filter, int width, int height){
-		return new Kernel(3, 3, filter);
+		return new Kernel(KERNEL_SIZE, KERNEL_SIZE, filter);
 	}
 	
 	private ConvolveOp createConvolveOp(Kernel k){

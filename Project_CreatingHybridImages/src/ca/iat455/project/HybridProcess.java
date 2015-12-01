@@ -61,7 +61,7 @@ public class HybridProcess extends HybridAbstractClass {
 		g.setFont(font);
 		String[] stepLabels = {
 				"Source A", "1. Grayscale", "2. Blur",
-				"Source B", "3. Edge detection (Sobel filter)", "4. Grayscale", "5. Dissolve steps 3 & 4",
+				"Source B", "3. Grayscale", "4. Edge detection", "5. Dissolve steps 3 & 4",
 				"6. Dissolve steps 2 & 5"};
 
 		for (int i = 0; i < outputImages.size(); i++) {
