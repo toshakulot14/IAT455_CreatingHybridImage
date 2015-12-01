@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * This class shows three different sets of hybrid images, using different source
@@ -257,6 +258,10 @@ public class HybridComparison extends HybridAbstractClass {
 		browseBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = new JFileChooser();
+				
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "png", "gif", "jpeg");
+				fc.setFileFilter(filter);
+				
 				int result = fc.showOpenDialog(null);
 				
 				if (result == JFileChooser.APPROVE_OPTION) {
