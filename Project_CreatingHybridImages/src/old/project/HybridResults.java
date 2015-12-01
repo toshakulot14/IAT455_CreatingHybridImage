@@ -1,4 +1,4 @@
-package ca.iat455.project;
+package old.project;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
