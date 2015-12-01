@@ -22,6 +22,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 /**
  * This class shows three different sets of hybrid images, using different source
@@ -37,12 +38,13 @@ public class HybridComparison extends HybridAbstractClass {
 	private final static int LABEL_Y_OFFSET = 50;
 	private final static int IMAGE_X_OFFSET = 10;
 	private final static int IMAGE_Y_OFFSET = 60;
-	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "wolf", "wolf", "lion", "car", "wolf" };
+	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "tiger", "lion", "tiger2", "car", "tiger" };
 
 	// Fields for output display
 	private JPanel panel;
 	private JPanel panel2;
 	private JScrollPane scrollPane;
+	private float mixVal = 0.5f;
 	
 	///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +60,7 @@ public class HybridComparison extends HybridAbstractClass {
 		for (int i = 0; i < inputImages.size(); i += 2) {
 			BufferedImage img1 = inputImages.get(i);
 			BufferedImage img2 = inputImages.get(i + 1);
-			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, false, false, false);
+			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, mixVal, false, false, false);
 			
 			// Add images
 			outputImages.addAll(processImages);
@@ -169,6 +171,27 @@ public class HybridComparison extends HybridAbstractClass {
 		for(int i=0; i < inputImages.size(); i++){
 			btnPanel.add(btnList.get(i));
 		}		
+		
+		// Create text field for dissolve
+		JTextField textField = new JTextField(20);
+		btnPanel.add(textField);
+		JButton dissolveBtn = new JButton("Change dissolve");
+		btnPanel.add(dissolveBtn);
+		dissolveBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					float tempMixVal = Float.parseFloat(textField.getText());
+					if (tempMixVal >= 0 && tempMixVal <= 1) {
+						mixVal = tempMixVal;
+					}
+					update();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Value must be a float, e.g. 0.5");
+					e.printStackTrace();
+				}
+			}
+		});
 		
 		//create panel for BorderNorth
 		JPanel panel = new JPanel(new BorderLayout());

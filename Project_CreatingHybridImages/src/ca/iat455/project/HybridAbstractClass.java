@@ -41,9 +41,9 @@ abstract public class HybridAbstractClass extends JFrame {
 ///////////////////////////////////////// Process /////////////////////////////////////////
 	
 	abstract protected void createHybridImages();
-	
+
 	protected ArrayList<BufferedImage> createHybridImage(BufferedImage img1, BufferedImage img2, float[] filter,
-			boolean showProcess, boolean showCustom, boolean showCustomProcess) {
+			float mixVal, boolean showProcess, boolean showCustom, boolean showCustomProcess) {
 		ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
 		
 		HIGH_PASS = filter;
@@ -63,13 +63,12 @@ abstract public class HybridAbstractClass extends JFrame {
 		BufferedImage filteredImg2c = dissolve(filteredImg2a, filteredImg2b, DISSOLVE_AMOUNT);
 		
 		// Hybrid image
-		BufferedImage hybridImg = dissolve(filteredImg1b, filteredImg2c, 0.35f);
+		BufferedImage hybridImg = dissolve(filteredImg1b, filteredImg2c, mixVal);
 		
 		// Add process images for display
 		if (showCustomProcess) {
 			images.add(img1);
 			images.add(filteredImg1b);
-			System.out.println("ok");
 		}
 		
 		if (showProcess) {
@@ -81,7 +80,6 @@ abstract public class HybridAbstractClass extends JFrame {
 			images.add(filteredImg2a);
 			images.add(filteredImg2b);
 			images.add(filteredImg2c);
-			System.out.println("not ok");
 		}
 		
 		images.add(hybridImg);

@@ -45,13 +45,13 @@ public class HybridCustomConvolve extends HybridAbstractClass {
 		// Java convolve
 		BufferedImage img1 = inputImages.get(0);
 		BufferedImage img2 = inputImages.get(1);
-		ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, false, false, true);
+		ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, 0.5f, false, false, true);
 		outputImages.addAll(processImages);
 		
 		// Custom convolve
 		BufferedImage img3 = inputImages.get(2);
 		BufferedImage img4 = inputImages.get(3);
-		processImages = createHybridImage(img3, img4, HIGH_PASS, false, true, true);
+		processImages = createHybridImage(img3, img4, HIGH_PASS, 0.5f, false, true, true);
 		outputImages.addAll(processImages);
 	} // createHybridImages
 		
