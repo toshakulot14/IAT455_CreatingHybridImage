@@ -37,9 +37,7 @@ public class HybridComparison extends HybridAbstractClass {
 	private final static int LABEL_Y_OFFSET = 50;
 	private final static int IMAGE_X_OFFSET = 10;
 	private final static int IMAGE_Y_OFFSET = 60;
-	private final static int IMAGES_PER_ROW = 4;
-	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "tiger", "lion", "tiger2", "car",
-			"tiger" };
+	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "wolf", "wolf", "lion", "car", "wolf" };
 
 	// Fields for output display
 	private JPanel panel;
@@ -60,7 +58,7 @@ public class HybridComparison extends HybridAbstractClass {
 		for (int i = 0; i < inputImages.size(); i += 2) {
 			BufferedImage img1 = inputImages.get(i);
 			BufferedImage img2 = inputImages.get(i + 1);
-			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, false);
+			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, false, false, false);
 			
 			// Add images
 			outputImages.addAll(processImages);

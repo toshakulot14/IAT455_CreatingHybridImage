@@ -41,17 +41,17 @@ public class HybridAbstractClass extends JFrame {
 		BufferedImage filteredImg2a = convolve(img2, Filters.HIGH_FREQ);
 		BufferedImage filteredImg2b = grayscale(img2);
 		BufferedImage filteredImg2c = dissolve(filteredImg2b, filteredImg2a, 0.5f);
-		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
+//		BufferedImage filteredImg2d = brighten(filteredImg2c, 1.5f);
 		
 		// Hybrid image
-		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2c, 0.5f);
+		BufferedImage hybridImg = dissolve(filteredImg1, filteredImg2c, 0.35f);
 		
 		if (isTest) {
 			images.add(filteredImg1);
 			images.add(filteredImg2a);
 			images.add(filteredImg2b);
 			images.add(filteredImg2c);
-			images.add(filteredImg2d);
+//			images.add(filteredImg2d);
 		}
 		images.add(hybridImg);
 		

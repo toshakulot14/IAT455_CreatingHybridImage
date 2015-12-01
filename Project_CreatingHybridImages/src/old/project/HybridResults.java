@@ -52,7 +52,7 @@ public class HybridResults extends HybridAbstractClass {
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public HybridResults() {
-		loadImages(new String[]{"lion", "tiger", "lion", "tiger2", "SFU", "tiger"}, true);
+		loadImages(new String[]{"lion", "wolf", "wolf", "lion", "car", "tiger"}, true);
 		createHybridImages();
 		drawImages();
 		setupWindow();
