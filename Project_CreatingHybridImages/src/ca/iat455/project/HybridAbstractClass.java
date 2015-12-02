@@ -24,14 +24,15 @@ abstract public class HybridAbstractClass extends JFrame {
 	
 	// Constants
 	private static final int KERNEL_SIZE = 3;
-	private static final float[] LOW_PASS = {1/16f, 1/8f, 1/16f,
-											1/8f, 1/4f, 1/8f,
-											1/16f, 1/8f, 1/16f};
-	protected static float[] HIGH_PASS = { 1, 2, 1,
-				  							0, 0, 0,
-				  							-1, -2, -1 }; //top sobel
 	
-	private static final float DISSOLVE_AMOUNT = 0.5f;
+	private static final float[] low_pass = {1/16f, 1/8f, 1/16f,
+											 1/8f, 1/4f, 1/8f,
+											 1/16f, 1/8f, 1/16f};	//gaussian blur
+	protected static float[] high_pass = { 1, 2, 1,
+				  						   0, 0, 0,
+				  						  -1, -2, -1 };	//top sobel
+	
+	protected static float dissolve_value = 0.5f;
 	
 	// Fields for output display
 	protected ArrayList<BufferedImage> inputImages = new ArrayList<BufferedImage>();
@@ -46,7 +47,7 @@ abstract public class HybridAbstractClass extends JFrame {
 			float mixVal, boolean showProcess, boolean showCustom, boolean showCustomProcess) {
 		ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
 		
-		HIGH_PASS = filter;
+		high_pass = filter;
 		
 		// Low frequency image
 		BufferedImage filteredImg1a = grayscale(img1);
@@ -54,16 +55,16 @@ abstract public class HybridAbstractClass extends JFrame {
 		if (showCustom) {
 			filteredImg1b = customConvolve(filteredImg1a, Filters.LOW_FREQ);
 		} else {
-			filteredImg1b = convolve(filteredImg1a, LOW_PASS, KERNEL_SIZE, KERNEL_SIZE);
+			filteredImg1b = convolve(filteredImg1a, low_pass, KERNEL_SIZE, KERNEL_SIZE);
 		}
 		
 		// High frequency image
 		BufferedImage filteredImg2a = grayscale(img2);
-		BufferedImage filteredImg2b = convolve(grayscale(img2), HIGH_PASS, KERNEL_SIZE, KERNEL_SIZE);
-		BufferedImage filteredImg2c = dissolve(filteredImg2a, filteredImg2b, DISSOLVE_AMOUNT);
+		BufferedImage filteredImg2b = convolve(grayscale(img2), high_pass, KERNEL_SIZE, KERNEL_SIZE);
+		BufferedImage filteredImg2c = dissolve(filteredImg2a, filteredImg2b, dissolve_value);
 		
 		// Hybrid image
-		BufferedImage hybridImg = dissolve(filteredImg1b, filteredImg2c, mixVal);
+		BufferedImage hybridImg = dissolve(filteredImg1b, filteredImg2c, dissolve_value);
 		
 		// Add process images for display
 		if (showCustomProcess) {
@@ -87,7 +88,7 @@ abstract public class HybridAbstractClass extends JFrame {
 		return images;
 	} // createHybridImage
 	
-	protected BufferedImage convolve(BufferedImage img, float[] kernel, int filterWidth, int filterHeight){
+	private BufferedImage convolve(BufferedImage img, float[] kernel, int filterWidth, int filterHeight){
 		BufferedImage result = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
 
 		Kernel k = createKernel(kernel, filterWidth, filterHeight);
@@ -284,7 +285,11 @@ abstract public class HybridAbstractClass extends JFrame {
 	}
 	
 	protected void setFilter(float[] filter){
-		HIGH_PASS = filter;
+		high_pass = filter;
+	}
+	
+	protected void setDissolveValue(float value){
+		dissolve_value = value;
 	}
 	
 ///////////////////////////////////////// Setup /////////////////////////////////////////

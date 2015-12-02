@@ -17,6 +17,5 @@ public class HybridMain {
 		HybridComparison hybridComparison = new HybridComparison();
 		hybridComparison.repaint();
 		
-		
 	}
 } // HybridMain

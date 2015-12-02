@@ -41,10 +41,9 @@ public class HybridComparison extends HybridAbstractClass {
 	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "tiger", "lion", "tiger2", "car", "tiger" };
 
 	// Fields for output display
-	private JPanel panel;
-	private JPanel panel2;
-	private JScrollPane scrollPane;
-	private float mixVal = 0.5f;
+	private JPanel panelCenter;
+	private JPanel panelWest;
+	private JPanel panelNorth;
 	
 	///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +59,11 @@ public class HybridComparison extends HybridAbstractClass {
 		for (int i = 0; i < inputImages.size(); i += 2) {
 			BufferedImage img1 = inputImages.get(i);
 			BufferedImage img2 = inputImages.get(i + 1);
-			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, HIGH_PASS, mixVal, false, false, false);
+			
+			boolean showProcess = false;
+			boolean showCustom = false;
+			boolean showCustomProcess = false;
+			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, high_pass, dissolve_value, showProcess, showCustom, showCustomProcess);
 			
 			// Add images
 			outputImages.addAll(processImages);
@@ -72,7 +75,7 @@ public class HybridComparison extends HybridAbstractClass {
 	} // createHybridImages
 		
 	private void drawImages() {
-		panel = new JPanel() {
+		panelCenter = new JPanel() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -124,85 +127,8 @@ public class HybridComparison extends HybridAbstractClass {
         }; // JPanel
 	} // drawImages
 
-	///////////////////////////////////////// Setup /////////////////////////////////////////
-	
-	private void setupWindow() {
-		panel.setPreferredSize(PANEL_SIZE);
-		scrollPane = new JScrollPane(panel);
-		add(scrollPane, BorderLayout.CENTER);
-		////////
-		
-		String[] filters = {"Emboss", "Sharpen", "Top Sobel", "Right Sobel"};
-		JComboBox<String> filterSelector = new JComboBox<String>(filters);
-		filterSelector.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e){
-				String str = (String) filterSelector.getSelectedItem();
-				
-				float[] filter = new float[9];
-				if(str.equals(filters[0])){
-					float[] tmp = {-2, -1, 0, -1, 1, 0, 0, 1, 2};
-					filter = tmp;
-				} else if(str.equals(filters[1])){
-					float[] tmp = {0, -1 ,0, -1, 4, -1, 0, -1, 0};
-					filter = tmp;
-				} else if(str.equals(filters[2])){
-					float[] tmp = {1, 2, 1 , 0, 0 ,0, -1, -2, -1};
-					filter = tmp;
-				} else if(str.equals(filters[3])){
-					float[] tmp = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
-					filter = tmp;
-				}
-				setFilter(filter);
-
-				update();
-			
-			}//anonymous listener	
-		}); //fileSelector
-		
-		//create browse buttons
-		ArrayList<JButton> btnList = new ArrayList<JButton>();
-		for(int i=0; i < inputImages.size(); i++){
-			btnList.add(createBrowseBtn(inputImages, i));
-		}
-		
-		//create panel to hold buttons
-		JPanel btnPanel = new JPanel(new FlowLayout());
-		for(int i=0; i < inputImages.size(); i++){
-			btnPanel.add(btnList.get(i));
-		}		
-		
-		// Create text field for dissolve
-		JTextField textField = new JTextField(20);
-		btnPanel.add(textField);
-		JButton dissolveBtn = new JButton("Change dissolve");
-		btnPanel.add(dissolveBtn);
-		dissolveBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					float tempMixVal = Float.parseFloat(textField.getText());
-					if (tempMixVal >= 0 && tempMixVal <= 1) {
-						mixVal = tempMixVal;
-					}
-					update();
-				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Value must be a float, e.g. 0.5");
-					e.printStackTrace();
-				}
-			}
-		});
-		
-		//create panel for BorderNorth
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(filterSelector, BorderLayout.CENTER);
-		panel.add(btnPanel, BorderLayout.NORTH);
-		
-		add(panel, BorderLayout.NORTH);
-		
-		//////
-		
-		panel2 = new JPanel(){
+	private JPanel drawSourceImages() {
+		return new JPanel(){
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -214,7 +140,7 @@ public class HybridComparison extends HybridAbstractClass {
 	    		int x = 0;
 	    		int y = 0;
 	
-	    		//labels
+	    		//make labels
 	    		Font font = new Font("Verdana", Font.PLAIN, 14);
         		g.setFont(font);
         		ArrayList<String> labels = new ArrayList<String>();
@@ -222,50 +148,98 @@ public class HybridComparison extends HybridAbstractClass {
         			labels.add("Source " + i);
         		}
 	    		
+        		//loop through inputs, and render them
 	    		for (int i = 0; i < inputImages.size(); i++) {
 		    		g.setColor(Color.BLACK);
 		    		
 	    			// Draw labels and images
-	    			int init = 20;
-	    			g.drawImage(inputImages.get(i), x, y+init+(i*20)+5, w/3, h/3, this);
-	    			g.drawString(labels.get(i), x, y+init+(i*20));
+	    			int padding = 20;
+	    			g.drawImage(inputImages.get(i), x, y+padding+(i*20)+5, w/3, h/3, this);
+	    			g.drawString(labels.get(i), x, y+padding+(i*20));
 
-	    			// draw line
+	    			// Draw separating line
 	    			if(i%2 == 1){
 		    			g.setColor(Color.GRAY);
 		    			Graphics2D g2d = (Graphics2D) g;
 		    			g2d.setStroke(new BasicStroke(3));
-		    			g.drawLine(0, y+init+(i*20)+20+h/3, getWidth(), y+init+(i*20)+20+h/3);	    				
+		    			g.drawLine(0, y+padding+(i*20)+20+h/3, getWidth(), y+padding+(i*20)+20+h/3);	    				
 	    			}
 	    			y += h/3 + 20;
+	    			
 	    		} //for
 			} // paintComponent	
 			
 		};
-		panel2.setPreferredSize(new Dimension(width/3+10, 1250));
-		JScrollPane scrollPane2 = new JScrollPane(panel2);
-		add(scrollPane2, BorderLayout.WEST);
+	}
+
+	///////////////////////////////////////// Setup /////////////////////////////////////////
+	
+	private void setupWindow() {
+		
+		/**** Set up North Border ****/
+		
+		// Create panel to hold buttons
+		JPanel northNestedPanel = new JPanel(new FlowLayout());
+		
+		// Create browse buttons and add to subpanel
+		ArrayList<JButton> btnList = new ArrayList<JButton>();
+		for(int i=0; i < inputImages.size(); i++){
+			btnList.add(createBrowseBtn(inputImages, i));
+			northNestedPanel.add(btnList.get(i));
+		}
+		
+		// Create text field and button for dissolve then add to subpanel
+		JTextField textField = new JTextField(10);
+		JButton dissolveBtn = createDissolveBtn(textField);
+		northNestedPanel.add(textField);		
+		northNestedPanel.add(dissolveBtn);
+		
+		// Create combobox for filter selection
+		String[] filters = {"Top Sobel", "Right Sobel", "Sharpen", "Emboss", "Edge Detection"};
+		JComboBox<String> filterSelector = createComboBox(filters);
+		
+		/**** Add components to BorderLayout ****/
+		
+		// Add North Border with Browse buttons and filter Combobox
+		panelNorth = new JPanel(new BorderLayout());
+		panelNorth.add(northNestedPanel, BorderLayout.NORTH);
+		panelNorth.add(filterSelector, BorderLayout.CENTER);
+		add(panelNorth, BorderLayout.NORTH);
+		
+		// Add West Border
+		panelWest = drawSourceImages();
+		panelWest.setPreferredSize(new Dimension(width/3+10, 1250));
+		JScrollPane scrollPaneWest = new JScrollPane(panelWest);
+		add(scrollPaneWest, BorderLayout.WEST);
+		
+		// Add Center Border
+		panelCenter.setPreferredSize(PANEL_SIZE);
+		JScrollPane scrollPaneCenter = new JScrollPane(panelCenter);
+		add(scrollPaneCenter, BorderLayout.CENTER);
 		
 		super.setupWindow("Hybrid Image Comparison");
 	} // setupWindow
 
-	
-	// TODO: MUST THROW ERROR WHEN INCORRECT IMG DIMENSIONS
+
 	private JButton createBrowseBtn(ArrayList<BufferedImage> list, int inputImagesIndex) {
 		JButton browseBtn = new JButton("Source " + (inputImagesIndex+1));
 		
 		browseBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
+				//create file chooser object
 				JFileChooser fc = new JFileChooser();
 				int result = fc.showOpenDialog(null);
 				
+				//try reading the file
 				if (result == JFileChooser.APPROVE_OPTION) {
 				    File file = fc.getSelectedFile(); 
 				    try {
 						BufferedImage newInput = ImageIO.read(file);
 						
+						//if new image is wrong dimensions, display pop up
 						if(newInput.getWidth() == width || newInput.getHeight() == height){
-							list.set(inputImagesIndex, newInput);	//bind input to button
+							//store input into list of inputimages at the ith position corresponding with ith button
+							list.set(inputImagesIndex, newInput);
 							
 							String msg = file.getName() + " read successfully";
 							JOptionPane.showMessageDialog(null, msg);
@@ -273,13 +247,14 @@ public class HybridComparison extends HybridAbstractClass {
 						} else {
 							String msg = "Dimensions of the image do not match. Images must be " + height + "x" + width;
 							JOptionPane.showMessageDialog(null, msg);
-						}
+						} //end if
 						
 					} catch (IOException e1) {
 						JOptionPane.showMessageDialog(null, "Error reading image.");
 						e1.printStackTrace();
-					}
-				}//end if
+					}  //end try catch
+				    
+				}//end reading file
 
 			}//end anonymous listener
 		});
@@ -287,12 +262,83 @@ public class HybridComparison extends HybridAbstractClass {
 		return browseBtn;
 	} // createBrowseBtn
 	
+	
+	private JButton createDissolveBtn(JTextField textField) {
+		JButton dissolveBtn = new JButton("Change dissolve");
+		
+		dissolveBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					float tempMixVal = Float.parseFloat(textField.getText());
+					
+					if (tempMixVal >= 0 && tempMixVal <= 1) {
+						setDissolveValue(tempMixVal);
+					} else {
+						JOptionPane.showMessageDialog(null, "Value must be a float from 0 to 1");
+					}
+					update();
+					
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Invalid input, try again.");
+					e.printStackTrace();
+				} //end try
+			} //end anonymous actionlistener
+			
+		});
+		
+		return dissolveBtn;
+	}
+	
+	
+	private JComboBox<String> createComboBox(String[] filters) {
+		JComboBox<String> filterSelector = new JComboBox<String>(filters);
+		
+		filterSelector.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e){
+				String selection = (String) filterSelector.getSelectedItem();
+				
+				//check which filter to use
+				float[] filter = new float[9];
+				
+				if (selection.equals(filters[0])) {
+					float[] tmp = {1, 2, 1 , 0, 0 ,0, -1, -2, -1};	//top sobel					
+					filter = tmp;
+				} else if(selection.equals(filters[1])) {
+					float[] tmp = {-1, 0, 1, -2, 0, 2, -1, 0, 1};	//right sobel
+					filter = tmp;
+				} else if(selection.equals(filters[2])) {
+					float[] tmp = {0, -1 ,0, -1, 4, -1, 0, -1, 0};	//sharpen
+					filter = tmp;
+				} else if(selection.equals(filters[3])) {
+					float[] tmp = {-2, -1, 0, -1, 1, 0, 0, 1, 2};	//emboss
+					filter = tmp;
+				} else if(selection.equals(filters[4])) {
+					float[] tmp = {-1, -1, -1, -1, 8, -1, -1, -1, -1};	//edge
+					filter = tmp;
+				} else {
+					//if nothing matches, do not filter
+					JOptionPane.showMessageDialog(null, "Whoops, there is an unhandled filter. Select another filter.");
+				} //end selection
+				
+				//set filter and redraw using new filter
+				setFilter(filter);
+				update();
+			
+			}//anonymous listener	
+		}); //fileSelector
+		
+		return filterSelector;
+	}
+	
+	
 	private void update(){
 		outputImages = new ArrayList<BufferedImage>();	//reset output images
 		createHybridImages();
-		panel.revalidate();
-		panel.repaint();
-		panel2.revalidate();
-		panel2.repaint();
+		panelWest.revalidate();
+		panelWest.repaint();
+		panelCenter.revalidate();
+		panelCenter.repaint();
 	}
 }

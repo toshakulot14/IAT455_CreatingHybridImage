@@ -29,7 +29,7 @@ public class HybridProcess extends HybridAbstractClass {
 	protected void createHybridImages() {		
 		BufferedImage img1 = inputImages.get(0);
 		BufferedImage img2 = inputImages.get(1);
-		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, HIGH_PASS, 0.5f, true, false, false);
+		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, high_pass, dissolve_value, true, false, false);
 		outputImages.addAll(processImages);
 	} // createHybridImages
 
@@ -42,7 +42,7 @@ public class HybridProcess extends HybridAbstractClass {
 		int x = IMAGE_X_OFFSET;
 		int y = IMAGE_Y_OFFSET + LABEL_Y_OFFSET * 3;
 
-		// Set main labels
+		// Set Header labels
 		Font font = new Font("Verdana", Font.PLAIN, 20);
 		g.setFont(font);
 		g.setColor(Color.BLACK);
@@ -67,7 +67,7 @@ public class HybridProcess extends HybridAbstractClass {
 		for (int i = 0; i < outputImages.size(); i++) {
 			// Draw labels and images
 			g.setColor(Color.BLACK);
-//			g.drawString(stepLabels[i], x, y - LABEL_Y_OFFSET);
+			g.drawString(stepLabels[i], x, y - LABEL_Y_OFFSET);
 			g.drawImage(outputImages.get(i), x, y, w, h, this);
 			
 			// Set values to next image in row
