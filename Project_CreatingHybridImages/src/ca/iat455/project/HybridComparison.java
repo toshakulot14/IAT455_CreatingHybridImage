@@ -63,10 +63,7 @@ public class HybridComparison extends HybridAbstractClass {
 			BufferedImage img1 = inputImages.get(i);
 			BufferedImage img2 = inputImages.get(i + 1);
 			
-			boolean showProcess = false;
-			boolean showCustom = false;
-			boolean showCustomProcess = false;
-			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, high_pass, dissolve_value, showProcess, showCustom, showCustomProcess);
+			ArrayList<BufferedImage> processImages = createHybridImage(img1, img2, high_pass, dissolve_value, false, false, false);
 			
 			// Add images
 			outputImages.addAll(processImages);

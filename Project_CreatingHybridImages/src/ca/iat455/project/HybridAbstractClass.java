@@ -23,14 +23,22 @@ abstract public class HybridAbstractClass extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	// Constants
-	private static final int KERNEL_SIZE = 3;
+	private static final int LOW_KERNEL_SIZE = 10;	//higher number = more blur
+	private static final int HIGH_KERNEL_SIZE = 3;
 	
+	//gaussian blur 3x3 (unused)
 	private static final float[] low_pass = {1/16f, 1/8f, 1/16f,
 											 1/8f, 1/4f, 1/8f,
-											 1/16f, 1/8f, 1/16f};	//gaussian blur
+											 1/16f, 1/8f, 1/16f};	
+	
+	//pixel average on NxN kernel determined by LOW_KERNEL_SIZE
+	private static int kernelSizeSquared = (int) Math.pow(LOW_KERNEL_SIZE, 2);
+	private static float[] low_pass5 = new float[kernelSizeSquared];
+	
+	//sobel
 	protected static float[] high_pass = { 1, 2, 1,
 				  						   0, 0, 0,
-				  						  -1, -2, -1 };	//top sobel
+				  						  -1, -2, -1 };	
 	
 	protected static float dissolve_value = 0.5f;
 	
@@ -45,8 +53,14 @@ abstract public class HybridAbstractClass extends JFrame {
 
 	protected ArrayList<BufferedImage> createHybridImage(BufferedImage img1, BufferedImage img2, float[] filter,
 			float mixVal, boolean showProcess, boolean showCustom, boolean showCustomProcess) {
+		
 		ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
 		
+		// Set filters
+		for(int i=0; i < kernelSizeSquared; i++){
+			//create neighboring average blur filter (all same value, 1/N)
+			low_pass5[i] = (float) 1/kernelSizeSquared;
+		}
 		high_pass = filter;
 		
 		// Low frequency image
@@ -55,12 +69,12 @@ abstract public class HybridAbstractClass extends JFrame {
 		if (showCustom) {
 			filteredImg1b = customConvolve(filteredImg1a, Filters.LOW_FREQ);
 		} else {
-			filteredImg1b = convolve(filteredImg1a, low_pass, KERNEL_SIZE, KERNEL_SIZE);
+			filteredImg1b = convolve(filteredImg1a, low_pass5, LOW_KERNEL_SIZE, LOW_KERNEL_SIZE);
 		}
 		
 		// High frequency image
 		BufferedImage filteredImg2a = grayscale(img2);
-		BufferedImage filteredImg2b = convolve(grayscale(img2), high_pass, KERNEL_SIZE, KERNEL_SIZE);
+		BufferedImage filteredImg2b = convolve(grayscale(img2), high_pass, HIGH_KERNEL_SIZE, HIGH_KERNEL_SIZE);
 		BufferedImage filteredImg2c = dissolve(filteredImg2a, filteredImg2b, dissolve_value);
 		
 		// Hybrid image
@@ -99,7 +113,7 @@ abstract public class HybridAbstractClass extends JFrame {
 	}
 	
 	private Kernel createKernel(float[] filter, int width, int height){
-		return new Kernel(KERNEL_SIZE, KERNEL_SIZE, filter);
+		return new Kernel(width, height, filter);
 	}
 	
 	private ConvolveOp createConvolveOp(Kernel k){
