@@ -29,7 +29,7 @@ public class HybridProcess extends HybridAbstractClass {
 	protected void createHybridImages() {		
 		BufferedImage img1 = inputImages.get(0);
 		BufferedImage img2 = inputImages.get(1);
-		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, high_pass, dissolve_value, true, false, false);
+		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, high_pass, 0.6f, true, false, false);
 		
 		outputImages.addAll(processImages);
 	} // createHybridImages

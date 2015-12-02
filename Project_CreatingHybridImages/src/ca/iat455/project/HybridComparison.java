@@ -23,6 +23,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 
 /**
  * This class shows three different sets of hybrid images, using different source
@@ -39,6 +41,7 @@ public class HybridComparison extends HybridAbstractClass {
 	private final static int IMAGE_X_OFFSET = 10;
 	private final static int IMAGE_Y_OFFSET = 60;
 	private final static String[] SOURCE_IMAGE_NAMES = new String[] { "lion", "tiger", "lion", "tiger2", "car", "tiger" };
+	private final static String[] filters = {"Sobel", "Prewitt", "Sharpen", "Emboss", "Edge Detection"};
 
 	// Fields for output display
 	private JPanel panelCenter;
@@ -195,7 +198,7 @@ public class HybridComparison extends HybridAbstractClass {
 		northNestedPanel.add(dissolveBtn);
 		
 		// Create combobox for filter selection
-		String[] filters = {"Sobel", "Prewitt", "Sharpen", "Emboss", "Edge Detection"};
+		
 		JComboBox<String> filterSelector = createComboBox(filters);
 		
 		/**** Add components to BorderLayout ****/
@@ -228,6 +231,10 @@ public class HybridComparison extends HybridAbstractClass {
 			public void actionPerformed(ActionEvent e) {
 				//create file chooser object
 				JFileChooser fc = new JFileChooser();
+				
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "png", "gif", "jpeg");
+				fc.setFileFilter(filter);
+				
 				int result = fc.showOpenDialog(null);
 				
 				//try reading the file
@@ -303,10 +310,10 @@ public class HybridComparison extends HybridAbstractClass {
 				float[] filter = new float[9];
 				
 				if (selection.equals(filters[0])) {
-					float[] tmp = {1, 2, 1 , 0, 0 ,0, -1, -2, -1};	//top sobel					
+					float[] tmp = {1, 2, 1 , 0, 0 ,0, -1, -2, -1};	//sobel					
 					filter = tmp;
 				} else if(selection.equals(filters[1])) {
-					float[] tmp = {-1, 0, 1, -2, 0, 2, -1, 0, 1};	//right sobel
+					float[] tmp = {-1, 0, 1, -1, 0, 1, -1, 0, 1};	//prewitt
 					filter = tmp;
 				} else if(selection.equals(filters[2])) {
 					float[] tmp = {0, -1 ,0, -1, 4, -1, 0, -1, 0};	//sharpen
