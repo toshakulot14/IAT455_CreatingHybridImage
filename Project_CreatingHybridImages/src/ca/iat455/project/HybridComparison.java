@@ -195,7 +195,7 @@ public class HybridComparison extends HybridAbstractClass {
 		northNestedPanel.add(dissolveBtn);
 		
 		// Create combobox for filter selection
-		String[] filters = {"Top Sobel", "Right Sobel", "Sharpen", "Emboss", "Edge Detection"};
+		String[] filters = {"Sobel", "Prewitt", "Sharpen", "Emboss", "Edge Detection"};
 		JComboBox<String> filterSelector = createComboBox(filters);
 		
 		/**** Add components to BorderLayout ****/

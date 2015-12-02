@@ -19,7 +19,7 @@ public class HybridProcess extends HybridAbstractClass {
 	private final static int LABEL_Y_OFFSET = 5;
 
 	public HybridProcess() {
-		String[] imgNames = {"lion", "wolf"};
+		String[] imgNames = {"lion", "tiger"};
 		loadImages(imgNames);
 		createHybridImages();
 		super.setupWindow("Hybrid Image Creation Process");
@@ -30,6 +30,7 @@ public class HybridProcess extends HybridAbstractClass {
 		BufferedImage img1 = inputImages.get(0);
 		BufferedImage img2 = inputImages.get(1);
 		ArrayList<BufferedImage> processImages = super.createHybridImage(img1, img2, high_pass, dissolve_value, true, false, false);
+		
 		outputImages.addAll(processImages);
 	} // createHybridImages
 
@@ -61,6 +62,7 @@ public class HybridProcess extends HybridAbstractClass {
 		g.setFont(font);
 		String[] stepLabels = {
 				"Source A", "1. Grayscale", "2. Blur",
+
 				"Source B", "3. Grayscale", "4. Edge detection", "5. Dissolve steps 3 & 4",
 				"6. Dissolve steps 2 & 5"};
 
@@ -83,4 +85,5 @@ public class HybridProcess extends HybridAbstractClass {
 			}
 		}
 	} // paint
+
 } // HybridProcess
